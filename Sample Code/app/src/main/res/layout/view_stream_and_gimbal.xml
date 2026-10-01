@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black">
+
+    <!-- Live Video Feed View -->
+    <com.dji.sdk.sample.internal.utils.VideoFeedView
+        android:id="@+id/video_feed_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true" />
+
+    <!-- Cover View shown when video is disconnected/not active -->
+    <TextView
+        android:id="@+id/tv_cover_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:text="Waiting for Video Feed..."
+        android:textColor="@android:color/white"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
+
+    <!-- Top Status / Header Overlay -->
+    <LinearLayout
+        android:id="@+id/top_bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:background="#99000000"
+        android:padding="8dp"
+        android:orientation="vertical"
+        android:gravity="center_horizontal">
+
+        <TextView
+            android:id="@+id/tv_gimbal_attitude"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Pitch: 0.0°  |  Yaw: 0.0°  |  Roll: 0.0°"
+            android:textColor="#FF4081"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tv_gimbal_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="Mode: YAW_FOLLOW"
+            android:textColor="#00E676"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <!-- Left Overlay: Directional & Mode Action Buttons -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/top_bar"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_margin="12dp"
+        android:background="#80000000"
+        android:padding="8dp"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gimbal Controls"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp" />
+
+        <!-- Pitch Up / Down -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_pitch_up"
+                style="@style/common_button"
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:text="Tilt Up ▲"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btn_pitch_down"
+                style="@style/common_button"
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:layout_marginLeft="6dp"
+                android:text="Tilt Down ▼"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Yaw Left / Right -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_yaw_left"
+                style="@style/common_button"
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:text="Pan Left ◀"
+                android:textSize="12sp" />
+
+            <Button
+                android:id="@+id/btn_yaw_right"
+                style="@style/common_button"
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:layout_marginLeft="6dp"
+                android:text="Pan Right ▶"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Reset Button -->
+        <Button
+            android:id="@+id/btn_reset_gimbal"
+            style="@style/common_button"
+            android:layout_width="206dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="6dp"
+            android:text="Center Gimbal"
+            android:textSize="12sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Gimbal Mode"
+            android:textColor="@android:color/white"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="4dp" />
+
+        <!-- Gimbal Modes -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btn_mode_yaw_follow"
+                style="@style/common_button"
+                android:layout_width="66dp"
+                android:layout_height="36dp"
+                android:text="Follow"
+                android:textSize="11sp" />
+
+            <Button
+                android:id="@+id/btn_mode_fpv"
+                style="@style/common_button"
+                android:layout_width="66dp"
+                android:layout_height="36dp"
+                android:layout_marginLeft="4dp"
+                android:text="FPV"
+                android:textSize="11sp" />
+
+            <Button
+                android:id="@+id/btn_mode_free"
+                style="@style/common_button"
+                android:layout_width="66dp"
+                android:layout_height="36dp"
+                android:layout_marginLeft="4dp"
+                android:text="Free"
+                android:textSize="11sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Right Overlay: OnScreenJoystick for 2D gimbal control -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/top_bar"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_margin="12dp"
+        android:background="#80000000"
+        android:padding="8dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Joystick Control"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="6dp" />
+
+        <com.dji.sdk.sample.internal.utils.OnScreenJoystick
+            android:id="@+id/joystick_gimbal"
+            android:layout_width="150dp"
+            android:layout_height="150dp" />
+    </LinearLayout>
+
+</RelativeLayout>

@@ -1,0 +1,55 @@
+[versions]
+annotation = "1.11.0"
+appcompat = "1.8.0"
+commonsMath3 = "3.6.1"
+constraintlayout = "2.2.2"
+coreKtx = "1.19.1"
+djiSdkProvided = "4.18"
+gradle = "9.4.1"
+gradleToolchainsFoojayResolverConvention = "1.0.0"
+guava = "33.7.2-jre"
+kotlin = "2.4.20"
+kotlinx = "1.11.0"
+lifecycle = "2.11.0"
+lifecycleExtensions = "2.2.0"
+multidex = "2.0.1"
+otto = "1.3.8"
+#playServices = "12.0.1"
+recyclerview = "1.4.0"
+rxandroid = "2.1.1"
+rxjava = "2.2.21"
+subsamplingScaleImageView = "3.10.0"
+swiperefreshlayout = "1.2.0"
+pytorch = "2.1.0"
+
+[libraries]
+androidx-annotation = { group = "androidx.annotation", name = "annotation", version.ref = "annotation" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+androidx-lifecycle-common-java8 = { group = "androidx.lifecycle", name = "lifecycle-common-java8", version.ref = "lifecycle" }
+androidx-lifecycle-extensions1 = { group = "androidx.lifecycle", name = "lifecycle-extensions", version.ref = "lifecycleExtensions" }
+androidx-lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycle" }
+androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+androidx-multidex = { group = "androidx.multidex", name = "multidex", version.ref = "multidex" }
+androidx-recyclerview = { group = "androidx.recyclerview", name = "recyclerview", version.ref = "recyclerview" }
+androidx-swiperefreshlayout = { group = "androidx.swiperefreshlayout", name = "swiperefreshlayout", version.ref = "swiperefreshlayout" }
+commons-math3 = { group = "org.apache.commons", name = "commons-math3", version.ref = "commonsMath3" }
+dji-sdk-provided = { group = "com.dji", name = "dji-sdk-provided", version.ref = "djiSdkProvided" }
+gradle = { group = "com.android.tools.build", name = "gradle", version.ref = "gradle" }
+guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx" }
+otto = { group = "com.squareup", name = "otto", version.ref = "otto" }
+#play-services = { group = "com.google.android.gms", name = "play-services", version.ref = "playServices" }
+rxandroid = { group = "io.reactivex.rxjava2", name = "rxandroid", version.ref = "rxandroid" }
+rxjava = { group = "io.reactivex.rxjava2", name = "rxjava", version.ref = "rxjava" }
+subsampling-scale-image-view = { group = "com.davemorrissey.labs", name = "subsampling-scale-image-view", version.ref = "subsamplingScaleImageView" }
+pytorch-android-lite = { group = "org.pytorch", name = "pytorch_android_lite", version.ref = "pytorch" }
+pytorch-android-torchvision-lite = { group = "org.pytorch", name = "pytorch_android_torchvision_lite", version.ref = "pytorch" }
+
+[plugins]
+foojay = { id = "org.gradle.toolchains.foojay-resolver-convention", version.ref = "gradleToolchainsFoojayResolverConvention" }
