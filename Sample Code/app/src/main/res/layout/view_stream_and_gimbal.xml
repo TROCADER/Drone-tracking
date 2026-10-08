@@ -11,6 +11,13 @@
         android:layout_height="match_parent"
         android:layout_centerInParent="true" />
 
+    <!-- AI Human Bounding Box Detection Overlay View -->
+    <com.dji.sdk.sample.demo.gimbal.DetectionOverlayView
+        android:id="@+id/detection_overlay_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_centerInParent="true" />
+
     <!-- Cover View shown when video is disconnected/not active -->
     <TextView
         android:id="@+id/tv_cover_view"
@@ -23,56 +30,75 @@
         android:textStyle="bold"
         android:visibility="gone" />
 
-    <!-- Top Status / Header Overlay -->
+    <!-- Bottom Overlay: PyTorch AI Detection Controls & Output -->
     <LinearLayout
-        android:id="@+id/top_bar"
+        android:id="@+id/panel_ai_detection"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:background="#99000000"
-        android:padding="8dp"
-        android:orientation="vertical"
-        android:gravity="center_horizontal">
+        android:layout_alignParentBottom="true"
+        android:background="#B3000000"
+        android:padding="10dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
 
-        <TextView
-            android:id="@+id/tv_gimbal_attitude"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Pitch: 0.0°  |  Yaw: 0.0°  |  Roll: 0.0°"
-            android:textColor="#FF4081"
-            android:textSize="14sp" />
+        <Button
+            android:id="@+id/btn_toggle_detection"
+            style="@style/common_button"
+            android:layout_width="140dp"
+            android:layout_height="44dp"
+            android:text="Start AI"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tv_gimbal_mode"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="Mode: YAW_FOLLOW"
-            android:textColor="#00E676"
-            android:textSize="13sp" />
+            android:layout_weight="1"
+            android:layout_marginStart="12dp"
+            android:layout_marginLeft="12dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tv_detection_status"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PyTorch: Off"
+                android:textColor="#00E676"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tv_detection_result"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Result: Click 'Start AI' to run detection"
+                android:textColor="@android:color/white"
+                android:textSize="13sp" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Left Overlay: Directional & Mode Action Buttons -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/top_bar"
-        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
         android:layout_alignParentStart="true"
+        android:layout_alignParentLeft="true"
         android:layout_margin="12dp"
         android:background="#80000000"
-        android:padding="8dp"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="8dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="6dp"
             android:text="Gimbal Controls"
             android:textColor="@android:color/white"
             android:textSize="14sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="6dp" />
+            android:textStyle="bold" />
 
         <!-- Pitch Up / Down -->
         <LinearLayout
@@ -93,6 +119,7 @@
                 style="@style/common_button"
                 android:layout_width="100dp"
                 android:layout_height="40dp"
+                android:layout_marginStart="6dp"
                 android:layout_marginLeft="6dp"
                 android:text="Tilt Down ▼"
                 android:textSize="12sp" />
@@ -118,6 +145,7 @@
                 style="@style/common_button"
                 android:layout_width="100dp"
                 android:layout_height="40dp"
+                android:layout_marginStart="6dp"
                 android:layout_marginLeft="6dp"
                 android:text="Pan Right ▶"
                 android:textSize="12sp" />
@@ -133,57 +161,15 @@
             android:text="Center Gimbal"
             android:textSize="12sp" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Gimbal Mode"
-            android:textColor="@android:color/white"
-            android:textSize="13sp"
-            android:textStyle="bold"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="4dp" />
-
-        <!-- Gimbal Modes -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btn_mode_yaw_follow"
-                style="@style/common_button"
-                android:layout_width="66dp"
-                android:layout_height="36dp"
-                android:text="Follow"
-                android:textSize="11sp" />
-
-            <Button
-                android:id="@+id/btn_mode_fpv"
-                style="@style/common_button"
-                android:layout_width="66dp"
-                android:layout_height="36dp"
-                android:layout_marginLeft="4dp"
-                android:text="FPV"
-                android:textSize="11sp" />
-
-            <Button
-                android:id="@+id/btn_mode_free"
-                style="@style/common_button"
-                android:layout_width="66dp"
-                android:layout_height="36dp"
-                android:layout_marginLeft="4dp"
-                android:text="Free"
-                android:textSize="11sp" />
-        </LinearLayout>
     </LinearLayout>
 
     <!-- Right Overlay: OnScreenJoystick for 2D gimbal control -->
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/top_bar"
-        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
         android:layout_margin="12dp"
         android:background="#80000000"
         android:padding="8dp"

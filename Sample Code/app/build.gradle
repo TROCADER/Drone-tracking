@@ -114,8 +114,8 @@ dependencies {
     implementation libs.rxjava
     implementation libs.rxandroid
 
-    implementation libs.pytorch.android.lite
-    implementation libs.pytorch.android.torchvision.lite
+    implementation libs.pytorch.android
+    implementation libs.pytorch.android.torchvision
 }
 
 //dependencies {

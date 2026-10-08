@@ -48,6 +48,8 @@ otto = { group = "com.squareup", name = "otto", version.ref = "otto" }
 rxandroid = { group = "io.reactivex.rxjava2", name = "rxandroid", version.ref = "rxandroid" }
 rxjava = { group = "io.reactivex.rxjava2", name = "rxjava", version.ref = "rxjava" }
 subsampling-scale-image-view = { group = "com.davemorrissey.labs", name = "subsampling-scale-image-view", version.ref = "subsamplingScaleImageView" }
+pytorch-android = { group = "org.pytorch", name = "pytorch_android", version.ref = "pytorch" }
+pytorch-android-torchvision = { group = "org.pytorch", name = "pytorch_android_torchvision", version.ref = "pytorch" }
 pytorch-android-lite = { group = "org.pytorch", name = "pytorch_android_lite", version.ref = "pytorch" }
 pytorch-android-torchvision-lite = { group = "org.pytorch", name = "pytorch_android_torchvision_lite", version.ref = "pytorch" }
 

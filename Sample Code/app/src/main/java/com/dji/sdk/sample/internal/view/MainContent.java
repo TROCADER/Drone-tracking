@@ -402,6 +402,8 @@ public class MainContent extends RelativeLayout {
             mTextConnectionStatus.setText(R.string.connection_loose);
             mTextModelAvailable.setText("Firmware version:N/A");
         }
+        // Temporarily force open button to be enabled without connection check
+//        mBtnOpen.setEnabled(true);
     }
 
     private void tryUpdateFirmwareVersionWithListener() {
