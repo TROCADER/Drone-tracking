@@ -220,3 +220,4 @@ __marimo__/
 .streamlit/secrets.toml
 
 datasets
+poc-ml-tracker/model_weights.pth
