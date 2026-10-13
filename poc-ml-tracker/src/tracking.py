@@ -21,7 +21,7 @@ assert weights.meta["categories"][PERSON_CLASS] == "person"
 
 
 DATASET = Path("./datasets/MOT15/train/")
-SEQ = "Venice-2"
+SEQ = "PETS09-S2L1"
 
 
 def read_data(seq_path: Path):
@@ -92,13 +92,17 @@ def select_boxes(raw_predictions, detection_threshold, iou_threshold):
 
 
 def run_video(seq_path: Path, gt_data: pd.DataFrame):
-    DETETECTION_THRESHOLD = 0.176
+    DETETECTION_THRESHOLD = 0.20
     # SMOOTHING_BANDWIDTH = 18
 
     image_files = [item for item in os.scandir(seq_path / "img1") if item.is_file()]
     image_files.sort(key=lambda p: p.name)
     tracker = Tracker(
-        state_uncertainty=200, measurement_noise=35, process_noise=0.1, max_age=10
+        max_distance=1,
+        state_uncertainty=200,
+        measurement_noise=35,
+        process_noise=0.1,
+        max_age=2,
     )
 
     for i, img_path in enumerate(image_files, start=1):

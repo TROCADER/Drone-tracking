@@ -151,7 +151,7 @@ import torchvision.ops as ops
 from scipy.optimize import linear_sum_assignment
 
 
-def calculate_giou_cost_matrix(
+def calculate_cost_matrix(
     boxes1_xywh: torch.Tensor, boxes2_xywh: torch.Tensor
 ) -> np.ndarray:
     if len(boxes1_xywh) == 0 or len(boxes2_xywh) == 0:
@@ -161,11 +161,9 @@ def calculate_giou_cost_matrix(
     boxes1_xyxy = ops.box_convert(boxes1_xywh, in_fmt="xywh", out_fmt="xyxy")
     boxes2_xyxy = ops.box_convert(boxes2_xywh, in_fmt="xywh", out_fmt="xyxy")
 
-    giou_matrix = ops.generalized_box_iou(boxes1_xyxy, boxes2_xyxy)
-
+    matrix = 1.0 - ops.complete_box_iou(boxes1_xyxy, boxes2_xyxy)
+    return matrix.numpy()
     # Safely convert to numpy and strip any residual NaNs
-    cost_matrix = (1.0 - giou_matrix).cpu().numpy()
-    return np.nan_to_num(cost_matrix, nan=2.0, posinf=2.0, neginf=2.0)
 
 
 def _extract_predictions(self, track_ids: list) -> torch.Tensor:
@@ -188,7 +186,7 @@ class Tracker:
         measurement_noise: float,
         process_noise: float,
         dt: float = 1.0,
-        max_giou_distance: float = 1.0,  # 1.0 corresponds to GIoU = 0.0 (non-overlapping)
+        max_distance: float = 1.0,
         max_age: int = 5,
     ):
         self.tracks = {}
@@ -197,7 +195,7 @@ class Tracker:
         self.measurement_noise = measurement_noise
         self.process_noise = process_noise
         self.dt = dt
-        self.max_giou_distance = max_giou_distance
+        self.max_distance = max_distance
         self.max_age = max_age
 
     def _init_track(self, bbox: np.ndarray) -> None:
@@ -224,7 +222,7 @@ class Tracker:
             return [], set(track_ids), set(range(len(det_bboxes)))
 
         predicted_boxes = self._extract_predictions(track_ids)
-        cost_matrix = calculate_giou_cost_matrix(predicted_boxes, det_bboxes)
+        cost_matrix = calculate_cost_matrix(predicted_boxes, det_bboxes)
         row_ind, col_ind = linear_sum_assignment(cost_matrix)
 
         matches = []
@@ -232,7 +230,7 @@ class Tracker:
         unassigned_dets = set(range(len(det_bboxes)))
 
         for r, c in zip(row_ind, col_ind):
-            if cost_matrix[r, c] <= self.max_giou_distance:
+            if cost_matrix[r, c] <= self.max_distance:
                 tid = track_ids[r]
                 matches.append((tid, c))
                 unassigned_tracks.remove(tid)
