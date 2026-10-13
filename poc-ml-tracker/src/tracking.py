@@ -1,6 +1,4 @@
-from multiprocessing import process
-from re import A
-from point_tracker import KalmanPointTracker, weighted_mean_shift
+from point_tracker import Tracker, weighted_mean_shift
 
 import numpy as np
 import pandas as pd
@@ -9,7 +7,6 @@ from pathlib import Path
 import cv2
 import os
 import torch
-from scipy.stats import gaussian_kde
 import torchvision
 from torchvision.transforms.functional import to_tensor
 from torchvision.models.detection.ssdlite import SSDLite320_MobileNet_V3_Large_Weights
@@ -24,7 +21,7 @@ assert weights.meta["categories"][PERSON_CLASS] == "person"
 
 
 DATASET = Path("./datasets/MOT15/train/")
-SEQ = ""
+SEQ = "Venice-2"
 
 
 def read_data(seq_path: Path):
@@ -80,12 +77,27 @@ def compute_smoothed_centers(prediction, threshold, bandwidth):
     return cluster_centers[combinded_weights >= threshold]
 
 
+def select_boxes(raw_predictions, detection_threshold, iou_threshold):
+    keep_mask = (raw_predictions["scores"] >= detection_threshold) & (
+        raw_predictions["labels"] == PERSON_CLASS
+    )
+
+    indices = torchvision.ops.nms(
+        raw_predictions["boxes"][keep_mask],
+        raw_predictions["scores"][keep_mask],
+        iou_threshold,
+    )
+
+    return {k: v[keep_mask][indices] for k, v in raw_predictions.items()}
+
+
 def run_video(seq_path: Path, gt_data: pd.DataFrame):
-    DETETECTION_THRESHOLD = 0.2
-    SMOOTHING_BANDWIDTH = 18
+    DETETECTION_THRESHOLD = 0.176
+    # SMOOTHING_BANDWIDTH = 18
+
     image_files = [item for item in os.scandir(seq_path / "img1") if item.is_file()]
     image_files.sort(key=lambda p: p.name)
-    tracker = KalmanPointTracker(
+    tracker = Tracker(
         state_uncertainty=200, measurement_noise=35, process_noise=0.1, max_age=10
     )
 
@@ -95,18 +107,17 @@ def run_video(seq_path: Path, gt_data: pd.DataFrame):
         if frame is None:
             continue
 
-        points = compute_smoothed_centers(
-            prediction, DETETECTION_THRESHOLD, SMOOTHING_BANDWIDTH
-        )
+        selected = select_boxes(prediction, DETETECTION_THRESHOLD, 0.25)
 
-        draw_tracks(frame, tracker.update(points))
-        # draw_predicitons(
-        #     frame,
-        #     prediction,
-        #     threshold=DETETECTION_THRESHOLD,
-        #     bandwidth=SMOOTHING_BANDWIDTH,
-        # )
-        draw_gt_bb(gt_data, i, frame)
+        draw_tracks(
+            frame,
+            tracker.update(
+                torchvision.ops.box_convert(
+                    selected["boxes"], in_fmt="xyxy", out_fmt="xywh"
+                )
+            ),
+        )
+        # draw_gt_bb(gt_data, i, frame)
         cv2.imshow("Object Detection Stream", frame)
 
         if cv2.waitKey(30) & 0xFF == ord("q"):
@@ -124,20 +135,21 @@ def draw_tracks(
 ):
 
     for tid, track in active_tracks.items():
-        start_pt = tuple(np.round(track["pos"]).astype(int))
-        end_pt = tuple(np.round(track["pos"] + track["vel"] * vel_scale).astype(int))
 
-        cv2.circle(frame, start_pt, radius=5, color=color_point, thickness=-1)
+        x, y, w, h = np.round(track).astype(int)
 
-        if np.linalg.norm(track["vel"]) > 1e-3:
-            cv2.arrowedLine(
-                frame,
-                start_pt,
-                end_pt,
-                color=color_arrow,
-                thickness=2,
-                tipLength=0.3,
-            )
+        start_pt = (x, y)
+        # end_pt = (x + vx, y + vy)
+
+        cv2.rectangle(frame, (x, y), (x + w, y + h), color=color_point)
+        # cv2.arrowedLine(
+        #     frame,
+        #     start_pt,
+        #     end_pt,
+        #     color=color_arrow,
+        #     thickness=2,
+        #     tipLength=0.3,
+        # )
 
         cv2.putText(
             frame,
@@ -167,21 +179,18 @@ def overlay_kde(frame, kde, scale=0.25, alpha=0.5):
     cv2.addWeighted(frame, 1 - alpha, heatmap, alpha, 0, dst=frame)
 
 
-def draw_predicitons(frame, prediction, threshold=0.2, bandwidth=15):
+def draw_predicitons(frame, prediction):
     boxes = prediction["boxes"]  # Bounding boxes: [N, 4]
-    labels = prediction["labels"]  # Class IDs: [N]
     scores = prediction["scores"]  # Confidence scores: [N]
 
-    mask = (scores >= threshold) & (labels == PERSON_CLASS)
-
-    center_xs = 0.5 * (boxes[:, 0] + boxes[:, 2])
-    center_ys = 0.5 * (boxes[:, 1] + boxes[:, 3])
+    # center_xs = 0.5 * (boxes[:, 0] + boxes[:, 2])
+    # center_ys = 0.5 * (boxes[:, 1] + boxes[:, 3])
 
     # centers = np.vstack([center_xs[mask], center_ys[mask]])
     # kde = gaussian_kde(centers, weights=scores[mask])
     # overlay_kde(frame, kde, scale=1 / 8)
-    max_score = max(scores[mask])
-    for score, box in zip(scores[mask], boxes[mask, :]):
+    max_score = max(scores)
+    for score, box in zip(scores, boxes):
         x1, y1, x2, y2 = box.int().tolist()
         p = score / max_score
 
@@ -197,25 +206,25 @@ def draw_predicitons(frame, prediction, threshold=0.2, bandwidth=15):
     #     2,
     # )
 
-    cluster_centers, combinded_weights, _ = weighted_mean_shift(
-        np.column_stack([center_xs[mask], center_ys[mask]]),
-        scores[mask],
-        max_iter=150,
-        bandwidth=bandwidth,
-    )
+    # cluster_centers, combinded_weights, _ = weighted_mean_shift(
+    #     np.column_stack([center_xs[mask], center_ys[mask]]),
+    #     scores[mask],
+    #     max_iter=150,
+    #     bandwidth=bandwidth,
+    # )
 
-    for (cx, cy), combinded_weight in zip(cluster_centers, combinded_weights):
-        cv2.circle(frame, (int(round(cx)), int(round(cy))), 3, (255, 0, 255), -1)
-        text = str(round(combinded_weight, ndigits=3))
-        cv2.putText(
-            frame,
-            text,
-            (int(cx), max(int(cy) - 10, 0)),
-            cv2.FONT_HERSHEY_SIMPLEX,
-            0.5,
-            (0, 255, 0),
-            2,
-        )
+    # for (cx, cy), combinded_weight in zip(cluster_centers, combinded_weights):
+    #     cv2.circle(frame, (int(round(cx)), int(round(cy))), 3, (255, 0, 255), -1)
+    #     text = str(round(combinded_weight, ndigits=3))
+    #     cv2.putText(
+    #         frame,
+    #         text,
+    #         (int(cx), max(int(cy) - 10, 0)),
+    #         cv2.FONT_HERSHEY_SIMPLEX,
+    #         0.5,
+    #         (0, 255, 0),
+    #         2,
+    #     )
 
 
 def draw_gt_bb(gt_data, i, frame):
