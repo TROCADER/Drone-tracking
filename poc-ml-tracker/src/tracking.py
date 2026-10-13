@@ -21,7 +21,7 @@ assert weights.meta["categories"][PERSON_CLASS] == "person"
 
 
 DATASET = Path("./datasets/MOT15/train/")
-SEQ = "Venice-2"
+SEQ = "PETS09-S2L1"
 
 
 def read_data(seq_path: Path):
@@ -44,14 +44,22 @@ def read_data(seq_path: Path):
 
 
 def predict_on_cv2_image(frame):
+    height, width = frame.shape[:2]
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
 
     image_tensor = to_tensor(rgb_frame)
 
     with torch.no_grad():
         predictions = model([image_tensor])
+    prediction = predictions[0]
 
-    return predictions[0]
+    scale_tensor = torch.tensor(
+        [width, height, width, height],
+        dtype=torch.float32,
+        device=prediction["boxes"].device,
+    )
+    prediction["boxes"] = prediction["boxes"] / scale_tensor
+    return prediction
 
 
 def compute_smoothed_centers(prediction, threshold, bandwidth):
@@ -92,13 +100,17 @@ def select_boxes(raw_predictions, detection_threshold, iou_threshold):
 
 
 def run_video(seq_path: Path, gt_data: pd.DataFrame):
-    DETETECTION_THRESHOLD = 0.176
+    DETETECTION_THRESHOLD = 0.22
     # SMOOTHING_BANDWIDTH = 18
 
     image_files = [item for item in os.scandir(seq_path / "img1") if item.is_file()]
     image_files.sort(key=lambda p: p.name)
     tracker = Tracker(
-        state_uncertainty=200, measurement_noise=35, process_noise=0.1, max_age=10
+        state_uncertainty=100,
+        measurement_noise=150,
+        process_noise=0.65,
+        max_age=5,
+        max_giou_distance=1.5,
     )
 
     for i, img_path in enumerate(image_files, start=1):
@@ -107,8 +119,8 @@ def run_video(seq_path: Path, gt_data: pd.DataFrame):
         if frame is None:
             continue
 
-        selected = select_boxes(prediction, DETETECTION_THRESHOLD, 0.25)
-
+        selected = select_boxes(prediction, DETETECTION_THRESHOLD, 0.05)
+        # draw_predicitons(frame, prediction)
         draw_tracks(
             frame,
             tracker.update(
@@ -117,6 +129,7 @@ def run_video(seq_path: Path, gt_data: pd.DataFrame):
                 )
             ),
         )
+
         # draw_gt_bb(gt_data, i, frame)
         cv2.imshow("Object Detection Stream", frame)
 
@@ -133,15 +146,16 @@ def draw_tracks(
     color_point: tuple[int, int, int] = (0, 255, 0),
     color_arrow: tuple[int, int, int] = (0, 0, 255),
 ):
+    img_h, img_w = frame.shape[:2]
 
     for tid, track in active_tracks.items():
 
-        x, y, w, h = np.round(track).astype(int)
-
-        start_pt = (x, y)
-        # end_pt = (x + vx, y + vy)
-
-        cv2.rectangle(frame, (x, y), (x + w, y + h), color=color_point)
+        x, y, w, h = track
+        x1 = int(img_w * x)
+        x2 = int(img_w * (x + w))
+        y1 = int(img_h * y)
+        y2 = int(img_h * (y + h))
+        cv2.rectangle(frame, (x1, y1), (x2, y2), color=color_point)
         # cv2.arrowedLine(
         #     frame,
         #     start_pt,
@@ -154,7 +168,7 @@ def draw_tracks(
         cv2.putText(
             frame,
             f"ID {tid}",
-            (start_pt[0] + 8, start_pt[1] - 8),
+            (x1 + 8, y1 - 8),
             cv2.FONT_HERSHEY_SIMPLEX,
             0.5,
             (255, 255, 255),
@@ -189,9 +203,15 @@ def draw_predicitons(frame, prediction):
     # centers = np.vstack([center_xs[mask], center_ys[mask]])
     # kde = gaussian_kde(centers, weights=scores[mask])
     # overlay_kde(frame, kde, scale=1 / 8)
+    img_h, img_w = frame.shape[:2]
     max_score = max(scores)
     for score, box in zip(scores, boxes):
-        x1, y1, x2, y2 = box.int().tolist()
+        x1, y1, x2, y2 = box
+        x1 = int(x1 * img_w)
+        x2 = int(x2 * img_w)
+        y1 = int(y1 * img_h)
+        y2 = int(y2 * img_h)
+
         p = score / max_score
 
         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, int(255 * p), 0), 1)

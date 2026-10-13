@@ -188,7 +188,7 @@ class Tracker:
         measurement_noise: float,
         process_noise: float,
         dt: float = 1.0,
-        max_giou_distance: float = 1.0,  # 1.0 corresponds to GIoU = 0.0 (non-overlapping)
+        max_giou_distance: float = 1.0,
         max_age: int = 5,
     ):
         self.tracks = {}
