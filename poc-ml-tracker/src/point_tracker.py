@@ -125,7 +125,7 @@ def create_kf(
         ]
     )
 
-    # Measurement function H (still measuring 2D position [x, y])
+    # Measurement function H
     kf.H = np.array(
         [
             [1, 0, 0, 0, 0, 0, 0, 0],
@@ -137,7 +137,12 @@ def create_kf(
 
     # Initial state uncertainty (P), measurement noise (R), and process noise (Q)
     kf.P *= state_uncertainty
-    kf.R *= measurement_noise  # Increase to smooth out noisy detections
+    kf.R = block_diag(
+        measurement_noise,
+        measurement_noise,
+        3 * measurement_noise,
+        3 * measurement_noise,
+    )  # Increase to smooth out noisy detections
 
     q_1d = Q_discrete_white_noise(dim=2, dt=dt, var=process_noise, order_by_dim=True)
     kf.Q = block_diag(q_1d, q_1d, q_1d, q_1d)
@@ -163,7 +168,7 @@ def calculate_cost_matrix(
 
     matrix = 1.0 - ops.complete_box_iou(boxes1_xyxy, boxes2_xyxy)
     return matrix.numpy()
-    # Safely convert to numpy and strip any residual NaNs
+    # Safely convert to numpy and strip any residual NaNs<
 
 
 def _extract_predictions(self, track_ids: list) -> torch.Tensor:
