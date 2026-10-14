@@ -7,6 +7,8 @@ from scipy.spatial.distance import cdist
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import connected_components
 from scipy.spatial.distance import cdist, pdist, squareform
+import torch
+import torchvision.ops as ops
 
 
 def weighted_mean_shift(
@@ -148,12 +150,6 @@ def create_kf(
     kf.Q = block_diag(q_1d, q_1d, q_1d, q_1d)
 
     return kf
-
-
-import numpy as np
-import torch
-import torchvision.ops as ops
-from scipy.optimize import linear_sum_assignment
 
 
 def calculate_cost_matrix(
