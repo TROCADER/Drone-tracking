@@ -1,5 +1,5 @@
 from point_tracker import Tracker, weighted_mean_shift
-
+from time import perf_counter
 import numpy as np
 import pandas as pd
 import configparser
@@ -100,20 +100,20 @@ def select_boxes(raw_predictions, detection_threshold, iou_threshold):
 
 
 def run_video(seq_path: Path, gt_data: pd.DataFrame):
-    DETETECTION_THRESHOLD = 0.22
-    # SMOOTHING_BANDWIDTH = 18
+    DETETECTION_THRESHOLD = 0.2
 
     image_files = [item for item in os.scandir(seq_path / "img1") if item.is_file()]
     image_files.sort(key=lambda p: p.name)
     tracker = Tracker(
-        state_uncertainty=100,
-        measurement_noise=150,
-        process_noise=0.65,
-        max_age=5,
-        max_giou_distance=1.5,
+        max_distance=1,
+        state_uncertainty=200,
+        measurement_noise=35,
+        process_noise=0.1,
+        max_age=2,
     )
 
     for i, img_path in enumerate(image_files, start=1):
+        start = perf_counter()
         frame = cv2.imread(img_path.path)
         prediction = predict_on_cv2_image(frame)
         if frame is None:
@@ -129,7 +129,8 @@ def run_video(seq_path: Path, gt_data: pd.DataFrame):
                 )
             ),
         )
-
+        end = perf_counter()
+        print(round(1 / (end - start), 3))
         # draw_gt_bb(gt_data, i, frame)
         cv2.imshow("Object Detection Stream", frame)
 
