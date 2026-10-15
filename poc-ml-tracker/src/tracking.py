@@ -105,9 +105,9 @@ def run_video(seq_path: Path, gt_data: pd.DataFrame):
     image_files = [item for item in os.scandir(seq_path / "img1") if item.is_file()]
     image_files.sort(key=lambda p: p.name)
     tracker = Tracker(
-        max_distance=0.1,
+        max_distance=0.09,
         state_uncertainty=200,
-        measurement_noise=35,
+        measurement_noise=80,
         process_noise=0.1,
         max_age=2,
     )
