@@ -6,7 +6,7 @@ from scipy.optimize import linear_sum_assignment
 from scipy.spatial.distance import cdist
 from scipy.sparse import csr_matrix
 from scipy.sparse.csgraph import connected_components
-from scipy.spatial.distance import cdist, pdist, squareform
+from scipy.spatial.distance import cdist, pdist, squareform, mahalanobis
 import torch
 import torchvision.ops as ops
 
@@ -152,7 +152,32 @@ def create_kf(
     return kf
 
 
-def calculate_cost_matrix(
+def calculate_mahalanobis_cost_matrix(
+    tracks: dict, track_ids: list, det_bboxes: np.ndarray
+) -> np.ndarray:
+    num_tracks = len(track_ids)
+    num_dets = len(det_bboxes)
+    cost_matrix = np.zeros((num_tracks, num_dets))
+
+    for r, tid in enumerate(track_ids):
+        kf = tracks[tid]["kf"]
+
+        # H projects the state space into the measurement space (bounding box coordinates)
+        # S represents the innovation covariance (measurement uncertainty + projected state uncertainty)
+        H = kf.H
+        S = np.dot(H, np.dot(kf.P, H.T)) + kf.R
+
+        S_inv = np.linalg.inv(S)
+
+        predicted_bbox = np.dot(H, kf.x).reshape(-1)
+
+        for c, det_bbox in enumerate(det_bboxes):
+            cost_matrix[r, c] = mahalanobis(predicted_bbox, det_bbox, S_inv)
+
+    return cost_matrix
+
+
+def calculate_ciou_cost_matrix(
     boxes1_xywh: torch.Tensor, boxes2_xywh: torch.Tensor
 ) -> np.ndarray:
     if len(boxes1_xywh) == 0 or len(boxes2_xywh) == 0:
@@ -189,6 +214,7 @@ class Tracker:
         dt: float = 1.0,
         max_distance: float = 1.0,
         max_age: int = 5,
+        tracking_mode="mahalanobis",
     ):
         self.tracks = {}
         self.next_id = 0
@@ -198,6 +224,7 @@ class Tracker:
         self.dt = dt
         self.max_distance = max_distance
         self.max_age = max_age
+        self.tracking_mode = tracking_mode
 
     def _init_track(self, bbox: np.ndarray) -> None:
         self.tracks[self.next_id] = {
@@ -221,9 +248,15 @@ class Tracker:
     def _associate_detections(self, track_ids: list, det_bboxes: torch.Tensor):
         if len(track_ids) == 0 or len(det_bboxes) == 0:
             return [], set(track_ids), set(range(len(det_bboxes)))
-
-        predicted_boxes = self._extract_predictions(track_ids)
-        cost_matrix = calculate_cost_matrix(predicted_boxes, det_bboxes)
+        if self.tracking_mode == "ciou":
+            predicted_boxes = self._extract_predictions(track_ids)
+            cost_matrix = calculate_ciou_cost_matrix(predicted_boxes, det_bboxes)
+        elif self.tracking_mode == "mahalanobis":
+            cost_matrix = calculate_mahalanobis_cost_matrix(
+                self.tracks, track_ids, det_bboxes
+            )
+        else:
+            raise ValueError(f"self.tracking_mode should not be '{self.tracking_mode}'")
         row_ind, col_ind = linear_sum_assignment(cost_matrix)
 
         matches = []
