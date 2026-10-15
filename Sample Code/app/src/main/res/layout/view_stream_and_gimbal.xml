@@ -77,6 +77,30 @@
                 android:textColor="@android:color/white"
                 android:textSize="13sp" />
         </LinearLayout>
+
+        <!-- Confidence threshold slider -->
+        <LinearLayout
+            android:layout_width="160dp"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginStart="8dp">
+
+            <TextView
+                android:id="@+id/tv_confidence_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Confidence: 99%"
+                android:textColor="@android:color/white"
+                android:textSize="12sp"/>
+
+            <SeekBar
+                android:id="@+id/seekbar_confidence"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="100"
+                android:progress="99" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Left Overlay: Directional & Mode Action Buttons -->

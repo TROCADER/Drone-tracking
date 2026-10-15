@@ -52,6 +52,8 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
     private Button btnToggleDetection;
     private TextView tvDetectionStatus;
     private TextView tvDetectionResult;
+    private android.widget.SeekBar seekBarConfidence;
+    private TextView tvConfidenceLabel;
 
     // AI Detection Backend
     private final PyTorchDetector detector = new PyTorchDetector();
@@ -153,6 +155,26 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
         btnToggleDetection = findViewById(R.id.btn_toggle_detection);
         tvDetectionStatus = findViewById(R.id.tv_detection_status);
         tvDetectionResult = findViewById(R.id.tv_detection_result);
+        seekBarConfidence = findViewById(R.id.seekbar_confidence);
+        tvConfidenceLabel = findViewById(R.id.tv_confidence_label);
+
+        if (seekBarConfidence != null) {
+            seekBarConfidence.setOnSeekBarChangeListener(new android.widget.SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(android.widget.SeekBar seekBar, int progress, boolean fromUser) {
+                    if (tvConfidenceLabel != null) {
+                        tvConfidenceLabel.setText("Confidence: " + progress + "%");
+                    }
+                    detector.setConfidenceThreshold(progress / 100.0f);
+                }
+
+                @Override
+                public void onStartTrackingTouch(android.widget.SeekBar seekBar) {}
+
+                @Override
+                public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
+            });
+        }
 
         Button btnPitchUp = findViewById(R.id.btn_pitch_up);
         Button btnPitchDown = findViewById(R.id.btn_pitch_down);

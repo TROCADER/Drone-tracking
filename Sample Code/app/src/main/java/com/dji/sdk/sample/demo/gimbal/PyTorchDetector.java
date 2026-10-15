@@ -5,10 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.RectF;
 import android.util.Log;
 
-import org.pytorch.IValue;
-import org.pytorch.Module;
-import org.pytorch.Tensor;
-import org.pytorch.torchvision.TensorImageUtils;
+import org.pytorch.executorch.EValue;
+import org.pytorch.executorch.Module;
+import org.pytorch.executorch.Tensor;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,9 +27,28 @@ import java.util.Map;
 public class PyTorchDetector {
 
     private static final String TAG = "PyTorchDetector";
-    private static final String MODEL_ASSET_NAME = "model_pytorch.pt";
+    private static final String MODEL_ASSET_NAME = "ssdlite320_mobilenet_v3_xnnpack.pte";
     private static final int INPUT_SIZE = 320; // SSDLite / Detection standard resolution
-    private static final float CONFIDENCE_THRESHOLD = 0.25f; // Confidence threshold
+    private float confidenceThreshold = 0.30f; // Confidence threshold
+    private static final float IOU_THRESHOLD = 0.25f; // NMS IoU threshold
+
+    public void setConfidenceThreshold(float threshold) {
+        this.confidenceThreshold = threshold;
+    }
+
+    private static class NmsBox {
+        RectF rect;
+        float score;
+        int classId;
+        String label;
+
+        NmsBox(RectF rect, float score, int classId, String label) {
+            this.rect = rect;
+            this.score = score;
+            this.classId = classId;
+            this.label = label;
+        }
+    }
 
     private Module module = null;
     private boolean isLoaded = false;
@@ -132,182 +150,76 @@ public class PyTorchDetector {
             // The PyTorch model (ssdlite) trace expects an unbatched 3D tensor [3, H, W]
             // because it internally unsqueezes to add the batch dimension.
             final java.nio.FloatBuffer inTensorBuffer = Tensor.allocateFloatBuffer(3 * INPUT_SIZE * INPUT_SIZE);
-            TensorImageUtils.bitmapToFloatBuffer(
-                    scaledBitmap,
-                    0, 0, INPUT_SIZE, INPUT_SIZE,
-                    TensorImageUtils.TORCHVISION_NORM_MEAN_RGB,
-                    TensorImageUtils.TORCHVISION_NORM_STD_RGB,
-                    inTensorBuffer,
-                    0
-            );
+            bitmapToFloatBuffer(scaledBitmap, inTensorBuffer);
+            
             final Tensor inputTensor = Tensor.fromBlob(
                     inTensorBuffer,
-                    new long[]{3, INPUT_SIZE, INPUT_SIZE}
+                    new long[]{1, 3, INPUT_SIZE, INPUT_SIZE}
             );
 
             long startTime = System.currentTimeMillis();
-            IValue outputValue;
-            try {
-                // Standard PyTorch forward pass (single tensor argument)
-                outputValue = module.forward(IValue.from(inputTensor));
-            } catch (Throwable t1) {
-                try {
-                    // Try Tuple/List of Tensors (often needed for some SSDLite wrapped inputs)
-                    outputValue = module.forward(IValue.tupleFrom(IValue.from(inputTensor)));
-                } catch (Throwable t2) {
-                    // Fallback to IValue list
-                    outputValue = module.forward(IValue.listFrom(inputTensor));
-                }
-            }
+            
+            // Forward pass
+            EValue[] outputs = module.forward(EValue.from(inputTensor));
             long elapsedTime = System.currentTimeMillis() - startTime;
 
             List<DetectionOverlayView.TargetBox> targetBoxes = new ArrayList<>();
             List<Recognition> topRecognitions = new ArrayList<>();
+            List<NmsBox> rawBoxes = new ArrayList<>();
 
-            if (outputValue != null) {
-                if (outputValue.isDictStringKey()) {
-                    // SSDLite Dict output {"boxes": tensor, "scores": tensor, "labels": tensor}
-                    Map<String, IValue> map = outputValue.toDictStringKey();
-                    IValue boxesVal = map.get("boxes");
-                    IValue scoresVal = map.get("scores");
-                    IValue labelsVal = map.get("labels");
+            if (outputs != null && outputs.length >= 2) {
+                float[] boxesData = outputs[0].toTensor().getDataAsFloatArray();
+                float[] scoresData = outputs[1].toTensor().getDataAsFloatArray();
 
-                    if (boxesVal != null && scoresVal != null && labelsVal != null) {
-                        float[] boxesData = boxesVal.toTensor().getDataAsFloatArray();
-                        float[] scoresData = scoresVal.toTensor().getDataAsFloatArray();
-                        long[] labelsData = labelsVal.toTensor().getDataAsLongArray();
+                // According to python code, the output is decoded_boxes [3234, 4] and scores [3234, 91]
+                int numBoxes = boxesData.length / 4;
+                int numClasses = scoresData.length / numBoxes; // Should be 91
+                
+                // SSD outputs typically need to be decoded. If the model outputs
+                // raw boxes, they usually need to be adjusted with priors/anchors.
+                // Assuming the output is already decoded bounding boxes:
 
-                        int count = scoresData.length;
-                        for (int i = 0; i < count; i++) {
-                            float score = scoresData[i];
-                            if (score >= CONFIDENCE_THRESHOLD) {
-                                int classId = (int) labelsData[i];
-                                float x1 = boxesData[i * 4] / INPUT_SIZE;
-                                float y1 = boxesData[i * 4 + 1] / INPUT_SIZE;
-                                float x2 = boxesData[i * 4 + 2] / INPUT_SIZE;
-                                float y2 = boxesData[i * 4 + 3] / INPUT_SIZE;
-
-                                RectF rect = new RectF(
-                                        Math.max(0.0f, Math.min(1.0f, x1)),
-                                        Math.max(0.0f, Math.min(1.0f, y1)),
-                                        Math.min(1.0f, Math.max(0.0f, x2)),
-                                        Math.min(1.0f, Math.max(0.0f, y2))
-                                );
-                                String label = (classId == 1) ? "Human Target" : getLabelName(classId);
-                                targetBoxes.add(new DetectionOverlayView.TargetBox(rect, label, score));
-                                topRecognitions.add(new Recognition(classId, label, score));
-                            }
+                for (int i = 0; i < numBoxes; i++) {
+                    // Start from class 1 (skip background class 0)
+                    float maxScore = -1.0f;
+                    int maxClassId = -1;
+                    
+                    for (int c = 1; c < numClasses; c++) {
+                        float score = scoresData[i * numClasses + c];
+                        if (score > maxScore) {
+                            maxScore = score;
+                            maxClassId = c;
                         }
                     }
-                } else if (outputValue.isTuple()) {
-                    // SSDLite Tuple output (boxes, scores, labels)
-                    IValue[] tuple = outputValue.toTuple();
-                    if (tuple != null && tuple.length >= 3) {
-                        float[] boxesData = tuple[0].toTensor().getDataAsFloatArray();
-                        float[] scoresData = tuple[1].toTensor().getDataAsFloatArray();
-                        long[] labelsData = tuple[2].toTensor().getDataAsLongArray();
+                    
+                    // We specifically check if the highest scoring class is a person (index 1)
+                    if (maxScore >= confidenceThreshold && maxClassId == 1) {
+                        // Coordinates are 0..320, we need to normalize them to 0..1
+                        float x1 = boxesData[i * 4] / INPUT_SIZE;
+                        float y1 = boxesData[i * 4 + 1] / INPUT_SIZE;
+                        float x2 = boxesData[i * 4 + 2] / INPUT_SIZE;
+                        float y2 = boxesData[i * 4 + 3] / INPUT_SIZE;
 
-                        int count = scoresData.length;
-                        for (int i = 0; i < count; i++) {
-                            float score = scoresData[i];
-                            if (score >= CONFIDENCE_THRESHOLD) {
-                                int classId = (int) labelsData[i];
-                                float x1 = boxesData[i * 4] / INPUT_SIZE;
-                                float y1 = boxesData[i * 4 + 1] / INPUT_SIZE;
-                                float x2 = boxesData[i * 4 + 2] / INPUT_SIZE;
-                                float y2 = boxesData[i * 4 + 3] / INPUT_SIZE;
-
-                                RectF rect = new RectF(
-                                        Math.max(0.0f, Math.min(1.0f, x1)),
-                                        Math.max(0.0f, Math.min(1.0f, y1)),
-                                        Math.min(1.0f, Math.max(0.0f, x2)),
-                                        Math.min(1.0f, Math.max(0.0f, y2))
-                                );
-                                String label = (classId == 1) ? "Human Target" : getLabelName(classId);
-                                targetBoxes.add(new DetectionOverlayView.TargetBox(rect, label, score));
-                                topRecognitions.add(new Recognition(classId, label, score));
-                            }
-                        }
+                        RectF rect = new RectF(
+                                Math.max(0.0f, Math.min(1.0f, x1)),
+                                Math.max(0.0f, Math.min(1.0f, y1)),
+                                Math.min(1.0f, Math.max(0.0f, x2)),
+                                Math.min(1.0f, Math.max(0.0f, y2))
+                        );
+                        rawBoxes.add(new NmsBox(rect, maxScore, maxClassId, "Human Target"));
                     }
-                } else if (outputValue.isTensor()) {
-                    final Tensor outputTensor = outputValue.toTensor();
-                    final float[] scores = outputTensor.getDataAsFloatArray();
-                    final long[] shape = outputTensor.shape();
+                }
+            }
 
-                    if (scores != null && scores.length > 0) {
-                        if (shape.length >= 2 && shape[shape.length - 1] >= 6) {
-                            // Standard detection tensor shape [N, 6] (x1, y1, x2, y2, score, class_id)
-                            int numDetections = (int) shape[shape.length - 2];
-                            int numCols = (int) shape[shape.length - 1];
-
-                            for (int i = 0; i < numDetections; i++) {
-                                int offset = i * numCols;
-                                float x1 = scores[offset];
-                                float y1 = scores[offset + 1];
-                                float x2 = scores[offset + 2];
-                                float y2 = scores[offset + 3];
-                                float score = scores[offset + 4];
-                                int classId = (int) scores[offset + 5];
-
-                                if (score >= CONFIDENCE_THRESHOLD) {
-                                    if (x2 > 1.0f || y2 > 1.0f) {
-                                        x1 /= INPUT_SIZE;
-                                        y1 /= INPUT_SIZE;
-                                        x2 /= INPUT_SIZE;
-                                        y2 /= INPUT_SIZE;
-                                    }
-                                    RectF rect = new RectF(
-                                            Math.max(0.0f, x1),
-                                            Math.max(0.0f, y1),
-                                            Math.min(1.0f, x2),
-                                            Math.min(1.0f, y2)
-                                    );
-                                    String label = (classId == 1 || classId == 0) ? "Human Target" : getLabelName(classId);
-                                    targetBoxes.add(new DetectionOverlayView.TargetBox(rect, label, score));
-                                    topRecognitions.add(new Recognition(classId, label, score));
-                                }
-                            }
-                        } else if (shape.length == 3 && shape[1] < shape[2] && shape[1] >= 5) {
-                            // YOLO detection tensor shape [1, 84, 8400]
-                            int numAnchors = (int) shape[2];
-
-                            for (int anchor = 0; anchor < numAnchors; anchor++) {
-                                // Person class score at index 4 (0:cx, 1:cy, 2:w, 3:h, 4:person_score)
-                                float personScore = scores[4 * numAnchors + anchor];
-                                if (personScore >= CONFIDENCE_THRESHOLD) {
-                                    float cx = scores[anchor];
-                                    float cy = scores[numAnchors + anchor];
-                                    float w = scores[2 * numAnchors + anchor];
-                                    float h = scores[3 * numAnchors + anchor];
-
-                                    if (cx > 1.0f || w > 1.0f) {
-                                        cx /= INPUT_SIZE;
-                                        cy /= INPUT_SIZE;
-                                        w /= INPUT_SIZE;
-                                        h /= INPUT_SIZE;
-                                    }
-
-                                    float x1 = Math.max(0.0f, cx - w / 2.0f);
-                                    float y1 = Math.max(0.0f, cy - h / 2.0f);
-                                    float x2 = Math.min(1.0f, cx + w / 2.0f);
-                                    float y2 = Math.min(1.0f, cy + h / 2.0f);
-
-                                    RectF rect = new RectF(x1, y1, x2, y2);
-                                    targetBoxes.add(new DetectionOverlayView.TargetBox(rect, "Human Target", personScore));
-                                    topRecognitions.add(new Recognition(0, "Human Target", personScore));
-                                }
-                            }
-                        } else {
-                            // Classification logits
-                            float[] probabilities = softmax(scores);
-                            for (int i = 0; i < probabilities.length; i++) {
-                                topRecognitions.add(new Recognition(i, "Human Target", probabilities[i]));
-                            }
-                            Collections.sort(topRecognitions);
-                            Recognition top = topRecognitions.get(0);
-                            RectF targetRect = new RectF(0.25f, 0.20f, 0.75f, 0.80f);
-                            targetBoxes.add(new DetectionOverlayView.TargetBox(targetRect, "Human Target", Math.max(0.25f, top.confidence)));
-                        }
+            // Apply NMS to collected boxes
+            if (!rawBoxes.isEmpty()) {
+                List<NmsBox> nmsFiltered = applyNMS(rawBoxes, IOU_THRESHOLD);
+                for (NmsBox box : nmsFiltered) {
+                    // One final check to make sure the boxes are somewhat sane sizes
+                    float boxArea = (box.rect.right - box.rect.left) * (box.rect.bottom - box.rect.top);
+                    if (boxArea > 0.001f && boxArea < 0.95f) {
+                        targetBoxes.add(new DetectionOverlayView.TargetBox(box.rect, box.label, box.score));
+                        topRecognitions.add(new Recognition(box.classId, box.label, box.score));
                     }
                 }
             }
@@ -332,9 +244,25 @@ public class PyTorchDetector {
         }
     }
 
-    private String getLabelName(int classId) {
-        if (classId == 1 || classId == 0) return "Human Target";
-        return "Target #" + classId;
+
+    private void bitmapToFloatBuffer(Bitmap bitmap, java.nio.FloatBuffer buffer) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+        int area = width * height;
+        int[] pixels = new int[area];
+        bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
+
+        for (int i = 0; i < area; i++) {
+            int pixel = pixels[i];
+            float r = ((pixel >> 16) & 0xFF) / 255.0f;
+            float g = ((pixel >> 8) & 0xFF) / 255.0f;
+            float b = (pixel & 0xFF) / 255.0f;
+
+            // Planar CHW layout: R plane, then G plane, then B plane
+            buffer.put(i, r);
+            buffer.put(area + i, g);
+            buffer.put(2 * area + i, b);
+        }
     }
 
     private float[] softmax(float[] logits) {
@@ -378,5 +306,43 @@ public class PyTorchDetector {
             }
         }
         return file.getAbsolutePath();
+    }
+
+    private List<NmsBox> applyNMS(List<NmsBox> boxes, float iouThreshold) {
+        Collections.sort(boxes, new java.util.Comparator<NmsBox>() {
+            @Override
+            public int compare(NmsBox b1, NmsBox b2) {
+                return Float.compare(b2.score, b1.score);
+            }
+        });
+
+        List<NmsBox> selected = new ArrayList<>();
+        for (NmsBox box : boxes) {
+            boolean keep = true;
+            for (NmsBox selectedBox : selected) {
+                if (calculateIoU(box.rect, selectedBox.rect) > iouThreshold) {
+                    keep = false;
+                    break;
+                }
+            }
+            if (keep) {
+                selected.add(box);
+            }
+        }
+        return selected;
+    }
+
+    private float calculateIoU(RectF a, RectF b) {
+        float x1 = Math.max(a.left, b.left);
+        float y1 = Math.max(a.top, b.top);
+        float x2 = Math.min(a.right, b.right);
+        float y2 = Math.min(a.bottom, b.bottom);
+
+        float intersectionArea = Math.max(0, x2 - x1) * Math.max(0, y2 - y1);
+        float areaA = (a.right - a.left) * (a.bottom - a.top);
+        float areaB = (b.right - b.left) * (b.bottom - b.top);
+
+        if (areaA + areaB - intersectionArea <= 0) return 0.0f;
+        return intersectionArea / (areaA + areaB - intersectionArea);
     }
 }
