@@ -50,13 +50,15 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
 
     // AI Detection UI Elements
     private Button btnToggleDetection;
+    private Button btnToggleTracking;
     private TextView tvDetectionStatus;
     private TextView tvDetectionResult;
     private android.widget.SeekBar seekBarConfidence;
     private TextView tvConfidenceLabel;
 
-    // AI Detection Backend
+    // AI Detection & Tracking Controllers
     private final PyTorchDetector detector = new PyTorchDetector();
+    private final GimbalTrackingController trackingController = new GimbalTrackingController();
     private boolean isDetectionRunning = false;
     private HandlerThread detectionThread;
     private Handler detectionHandler;
@@ -87,9 +89,21 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
                         if (detectionOverlayView != null) {
                             detectionOverlayView.setTargets(result.targets);
                         }
+
+                        // Feed target bounding box to PID tracking controller
+                        if (trackingController.isTrackingEnabled()) {
+                            if (result.targets != null && !result.targets.isEmpty()) {
+                                trackingController.setGimbal(getGimbal());
+                                trackingController.updateTarget(result.targets.get(0).rect);
+                            } else {
+                                trackingController.updateTarget(null);
+                            }
+                        }
+
                         PyTorchDetector.Recognition top = result.getTopRecognition();
                         if (top != null) {
-                            tvDetectionStatus.setText("PyTorch AI: Target Locked");
+                            tvDetectionStatus.setText(trackingController.isTrackingEnabled() ?
+                                    "PyTorch AI: Tracking Active" : "PyTorch AI: Target Locked");
                             tvDetectionResult.setText(String.format(Locale.US,
                                     "Target: %s (Score: %.1f%%) | Targets: %d | Latency: %d ms",
                                     top.title, top.confidence * 100.0f, result.targets.size(), result.inferenceTimeMs));
@@ -100,6 +114,9 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
                     } else {
                         if (detectionOverlayView != null) {
                             detectionOverlayView.clear();
+                        }
+                        if (trackingController.isTrackingEnabled()) {
+                            trackingController.updateTarget(null);
                         }
                         tvDetectionResult.setText("Error: " + result.errorMessage);
                     }
@@ -153,6 +170,7 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
         }
 
         btnToggleDetection = findViewById(R.id.btn_toggle_detection);
+        btnToggleTracking = findViewById(R.id.btn_toggle_tracking);
         tvDetectionStatus = findViewById(R.id.tv_detection_status);
         tvDetectionResult = findViewById(R.id.tv_detection_result);
         seekBarConfidence = findViewById(R.id.seekbar_confidence);
@@ -174,6 +192,10 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
                 @Override
                 public void onStopTrackingTouch(android.widget.SeekBar seekBar) {}
             });
+            if (tvConfidenceLabel != null) {
+                tvConfidenceLabel.setText("Confidence: " + seekBarConfidence.getProgress() + "%");
+            }
+            detector.setConfidenceThreshold(seekBarConfidence.getProgress() / 100.0f);
         }
 
         Button btnPitchUp = findViewById(R.id.btn_pitch_up);
@@ -182,14 +204,13 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
         Button btnYawRight = findViewById(R.id.btn_yaw_right);
         Button btnResetGimbal = findViewById(R.id.btn_reset_gimbal);
 
-//        Button btnModeFollow = findViewById(R.id.btn_mode_yaw_follow);
-//        Button btnModeFpv = findViewById(R.id.btn_mode_fpv);
-//        Button btnModeFree = findViewById(R.id.btn_mode_free);
-
         OnScreenJoystick joystickGimbal = findViewById(R.id.joystick_gimbal);
 
         if (btnToggleDetection != null) {
             btnToggleDetection.setOnClickListener(this);
+        }
+        if (btnToggleTracking != null) {
+            btnToggleTracking.setOnClickListener(this);
         }
 
         btnPitchUp.setOnClickListener(this);
@@ -197,9 +218,6 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
         btnYawLeft.setOnClickListener(this);
         btnYawRight.setOnClickListener(this);
         btnResetGimbal.setOnClickListener(this);
-//        btnModeFollow.setOnClickListener(this);
-//        btnModeFpv.setOnClickListener(this);
-//        btnModeFree.setOnClickListener(this);
 
         if (joystickGimbal != null) {
             joystickGimbal.setJoystickListener((joystick, pX, pY) -> {
@@ -263,6 +281,12 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
             });
         } else {
             isDetectionRunning = false;
+            if (trackingController.isTrackingEnabled()) {
+                trackingController.setTrackingEnabled(false);
+                if (btnToggleTracking != null) {
+                    btnToggleTracking.setText("Start Tracking");
+                }
+            }
             if (detectionHandler != null) {
                 detectionHandler.removeCallbacks(detectionRunnable);
             }
@@ -279,6 +303,35 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
                 tvDetectionResult.setText("Result: Click 'Start AI Mode' to run human detection");
             }
             ToastUtils.setResultToToast("PyTorch AI Detection stopped");
+        }
+    }
+
+    private void toggleTracking() {
+        boolean enable = !trackingController.isTrackingEnabled();
+        if (enable) {
+            trackingController.setGimbal(getGimbal());
+            trackingController.setTrackingEnabled(true);
+            if (btnToggleTracking != null) {
+                btnToggleTracking.setText("Stop Tracking");
+            }
+            if (tvDetectionStatus != null) {
+                tvDetectionStatus.setText("PyTorch AI: Tracking Active");
+            }
+            ToastUtils.setResultToToast("Gimbal PID Tracking Enabled");
+
+            // Automatically start AI detection if not already running
+            if (!isDetectionRunning) {
+                toggleDetection();
+            }
+        } else {
+            trackingController.setTrackingEnabled(false);
+            if (btnToggleTracking != null) {
+                btnToggleTracking.setText("Start Tracking");
+            }
+            if (tvDetectionStatus != null && isDetectionRunning) {
+                tvDetectionStatus.setText("PyTorch AI: Active");
+            }
+            ToastUtils.setResultToToast("Gimbal PID Tracking Disabled");
         }
     }
 
@@ -300,6 +353,10 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
         DJISampleApplication.getEventBus().post(new MainActivity.RequestEndFullScreenEvent());
         stopGimbalTimer();
         removeGimbalStateListener();
+
+        if (trackingController.isTrackingEnabled()) {
+            trackingController.setTrackingEnabled(false);
+        }
 
         isDetectionRunning = false;
         if (detectionHandler != null) {
@@ -336,8 +393,9 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
     private void initGimbalStateListener() {
         Gimbal g = getGimbal();
         if (g != null) {
+            trackingController.setGimbal(g);
             g.setStateCallback(gimbalState -> mainHandler.post(() -> {
-                // Gimbal state listener callback
+                trackingController.getGimbalStateCallback().onUpdate(gimbalState);
             }));
         }
     }
@@ -354,6 +412,8 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
         int id = v.getId();
         if (id == R.id.btn_toggle_detection) {
             toggleDetection();
+        } else if (id == R.id.btn_toggle_tracking) {
+            toggleTracking();
         } else if (id == R.id.btn_pitch_up) {
             rotateGimbalRelative(10.0f, 0);
         } else if (id == R.id.btn_pitch_down) {
@@ -365,13 +425,6 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
         } else if (id == R.id.btn_reset_gimbal) {
             resetGimbal();
         }
-//        } else if (id == R.id.btn_mode_yaw_follow) {
-//            setGimbalMode(GimbalMode.YAW_FOLLOW);
-//        } else if (id == R.id.btn_mode_fpv) {
-//            setGimbalMode(GimbalMode.FPV);
-//        } else if (id == R.id.btn_mode_free) {
-//            setGimbalMode(GimbalMode.FREE);
-//        }
     }
 
     private void rotateGimbalRelative(float pitchAngle, float yawAngle) {
@@ -408,21 +461,6 @@ public class StreamAndGimbalView extends RelativeLayout implements View.OnClickL
             ToastUtils.setResultToToast("Gimbal disconnected!");
         }
     }
-
-//    private void setGimbalMode(final GimbalMode mode) {
-//        Gimbal g = getGimbal();
-//        if (g != null) {
-//            g.setMode(mode, error -> {
-//                if (error == null) {
-//                    ToastUtils.setResultToToast("Gimbal Mode set to " + mode.name());
-//                } else {
-//                    ToastUtils.setResultToToast("Set mode failed: " + error.getDescription());
-//                }
-//            });
-//        } else {
-//            ToastUtils.setResultToToast("Gimbal disconnected!");
-//        }
-//    }
 
     private synchronized void startGimbalRotateTimer(final float pitchSpeed, final float yawSpeed) {
         stopGimbalTimer();

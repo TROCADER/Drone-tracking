@@ -220,6 +220,7 @@ public class PyTorchDetector {
                     if (boxArea > 0.001f && boxArea < 0.95f) {
                         targetBoxes.add(new DetectionOverlayView.TargetBox(box.rect, box.label, box.score));
                         topRecognitions.add(new Recognition(box.classId, box.label, box.score));
+                        break; // Gives single target
                     }
                 }
             }

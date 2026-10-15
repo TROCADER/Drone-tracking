@@ -44,9 +44,21 @@
         <Button
             android:id="@+id/btn_toggle_detection"
             style="@style/common_button"
-            android:layout_width="140dp"
+            android:layout_width="120dp"
             android:layout_height="44dp"
             android:text="Start AI"
+            android:textColor="@android:color/white"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <Button
+            android:id="@+id/btn_toggle_tracking"
+            style="@style/common_button"
+            android:layout_width="120dp"
+            android:layout_height="44dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginLeft="8dp"
+            android:text="Start Tracking"
             android:textColor="@android:color/white"
             android:textSize="12sp"
             android:textStyle="bold" />
@@ -90,16 +102,16 @@
                 android:id="@+id/tv_confidence_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Confidence: 99%"
+                android:text="Confidence"
                 android:textColor="@android:color/white"
-                android:textSize="12sp"/>
+                android:textSize="12sp" />
 
             <SeekBar
                 android:id="@+id/seekbar_confidence"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:max="100"
-                android:progress="99" />
+                android:progress="25" />
         </LinearLayout>
     </LinearLayout>
 
