@@ -1,3 +1,4 @@
+from reid_model import DeepSORTFeatureExtractor
 from point_tracker import Tracker, weighted_mean_shift
 from time import perf_counter
 import numpy as np
@@ -99,17 +100,22 @@ def select_boxes(raw_predictions, detection_threshold, iou_threshold):
     return {k: v[keep_mask][indices] for k, v in raw_predictions.items()}
 
 
+FPS: float = 59.574
+
+
 def run_video(seq_path: Path, gt_data: pd.DataFrame):
     DETETECTION_THRESHOLD = 0.2
 
     image_files = [item for item in os.scandir(seq_path / "img1") if item.is_file()]
     image_files.sort(key=lambda p: p.name)
+    image_files = [v for i, v in enumerate(image_files) if i % 3 == 0]
     tracker = Tracker(
         max_distance=0.09,
         state_uncertainty=200,
         measurement_noise=80,
         process_noise=0.1,
         max_age=2,
+        dt=1 / FPS,
     )
 
     for i, img_path in enumerate(image_files, start=1):
@@ -138,6 +144,90 @@ def run_video(seq_path: Path, gt_data: pd.DataFrame):
             break
 
     cv2.destroyAllWindows()
+
+
+def save_video(seq_path: Path, gt_data, output_path="output.mp4"):
+    DETETECTION_THRESHOLD = 0.2
+
+    # image_files = [item for item in os.scandir(seq_path / "img1") if item.is_file()]
+    # image_files.sort(key=lambda p: p.name)
+
+    # image_files = [v for i, v in enumerate(image_files)]
+
+    tracker = Tracker(
+        max_distance=0.04,
+        state_uncertainty=200,
+        measurement_noise=20,
+        process_noise=0.1,
+        max_age=2,
+        dt=1 / FPS,
+    )
+
+    # We will initialize the video writer once we read the first frame
+    video_writer = None
+    cap = cv2.VideoCapture(seq_path)
+
+    # for i, img_path in enumerate(image_files, start=1):
+    while True:
+
+        start = perf_counter()
+        success, frame = cap.read()  # cv2.imread(img_path.path)
+        if not success:
+            break
+
+        frame = cv2.resize(frame, dsize=None, fx=0.5, fy=0.5)
+        # Initialize the VideoWriter lazily using the dimensions of the first frame
+        if video_writer is None:
+            height, width = frame.shape[:2]
+            # Use 'mp4v' for .mp4 files, or 'XVID' for .avi files
+            fourcc = cv2.VideoWriter_fourcc(*"mp4v")
+            # Note: If you process every 3rd frame, you might want to adjust the output FPS
+            # e.g., output_fps = FPS / 3 to keep it real-time.
+            video_writer = cv2.VideoWriter(output_path, fourcc, FPS, (width, height))
+
+        prediction = predict_on_cv2_image(frame)
+
+        selected = select_boxes(prediction, DETETECTION_THRESHOLD, 0.05)
+
+        draw_tracks(
+            frame,
+            tracker.update(
+                torchvision.ops.box_convert(
+                    selected["boxes"], in_fmt="xyxy", out_fmt="xywh"
+                )
+            ),
+        )
+        end = perf_counter()
+        print(f"FPS: {round(1 / (end - start), 3)}")
+
+        # Write the processed frame to the video file
+        video_writer.write(frame)
+
+        # You can keep this to see the preview while it saves, or remove it for faster processing
+        cv2.imshow("Object Detection Stream", frame)
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            break
+
+    # Release the video writer to save the file properly
+    if video_writer is not None:
+        video_writer.release()
+
+    cv2.destroyAllWindows()
+
+
+# IUST_PERSON_REID_NUM_CLASSES = 1193
+
+# l = torch.load(
+#     "reid-model/deepsort_20261016_135100.pth", map_location=torch.device("cpu")
+# )
+
+
+# reid_model = DeepSORTFeatureExtractor(
+#     num_classes=IUST_PERSON_REID_NUM_CLASSES, reid=True
+# )
+# reid_model.load_state_dict(l)
+# # meta, gt_data = read_data(DATASET / SEQ)
+# # run_video(DATASET / SEQ, gt_data)
 
 
 def draw_tracks(
@@ -216,16 +306,16 @@ def draw_predicitons(frame, prediction):
         p = score / max_score
 
         cv2.rectangle(frame, (x1, y1), (x2, y2), (0, int(255 * p), 0), 1)
-    #     # text = f"Class {label.item()}: {score.item():.2f}"
-    # cv2.putText(
-    #     frame,
-    #     text,
-    #     (x, max(y - 10, 0)),
-    #     cv2.FONT_HERSHEY_SIMPLEX,
-    #     0.5,
-    #     (0, 255, 0),
-    #     2,
-    # )
+        text = f"{score.item():.2f}"
+        cv2.putText(
+            frame,
+            text,
+            (x1, max(y1 - 10, 0)),
+            cv2.FONT_HERSHEY_SIMPLEX,
+            0.5,
+            (0, 255, 0),
+            2,
+        )
 
     # cluster_centers, combinded_weights, _ = weighted_mean_shift(
     #     np.column_stack([center_xs[mask], center_ys[mask]]),
@@ -268,5 +358,13 @@ def draw_gt_bb(gt_data, i, frame):
         )
 
 
-meta, gt_data = read_data(DATASET / SEQ)
-run_video(DATASET / SEQ, gt_data)
+# meta, gt_data = read_data(DATASET / SEQ)
+# save_video("datasets/presentation5hp/PXL_20261021_151133620.mp4", gt_data)
+
+
+frame = cv2.imread("datasets/presentation5hp/Screenshot 2026-10-21 203701.png")
+predictions = predict_on_cv2_image(frame)
+draw_predicitons(frame, select_boxes(predictions, 0.1, 0.1))
+cv2.imwrite("./box-example.png", frame)
+
+cv2.waitKey(0)
