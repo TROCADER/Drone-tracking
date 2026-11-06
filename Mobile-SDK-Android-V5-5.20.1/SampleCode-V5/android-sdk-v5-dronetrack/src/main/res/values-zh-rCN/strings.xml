@@ -1,0 +1,678 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="news_title">MSDK 5.4.0</string>
+    <string name="news_description">"- 新增支持机型：Matrice 350 RTK。
+- Matric 300 RTK新增支持DJI RC Plus遥控器。
+
+更多功能查看发布日志。"</string>
+    <string name="news_date">2023–5–18</string>
+
+    <string name="sdk_forum_url">https://sdk-forum.dji.net/hc/zh-cn/community/topics</string>
+    <string name="release_node_url">https://developer.dji.com/doc/mobile-sdk-tutorial/cn/</string>
+    <string name="tech_support_url">https://sdk-forum.dji.net/hc/zh-cn/requests/new</string>
+
+    <string name="news_dialog_content_tips">MSDK有新版本更新，点击“查看”了解详情。</string>
+    <string name="news_dialog_btn_left">查看详情</string>
+    <string name="news_dialog_btn_right">退出</string>
+
+    <string name="release_note_tile_latest">MSDK最新版本：%s</string>
+    <string name="release_note_tile_current">MSDK当前版本：%s</string>
+    <string name="release_note_loading">加载中...</string>
+
+    <string name="app_name_all">MSDK全部功能</string>
+    <string name="app_name_aircraft">MSDK飞机功能</string>
+    <string name="app_name_handheld">MSDK手持功能</string>
+
+    <string name="item_key_value_title">Key/Value</string>
+    <string name="item_key_value_description">演示如何使用Key/Value功能</string>
+
+    <string name="item_multi_video_decoding_title">多路视频解码 (VideoStreamManager - 废弃)</string>
+    <string name="item_multi_video_decoding_description">演示如何使用多路图传和多路解码模块</string>
+
+    <string name="item_ar_projection_title">AR投射功能</string>
+    <string name="item_ar_projection_description">演示如何使用AR投射功能</string>
+
+    <!-- AR Projection Page Buttons -->
+    <string name="btn_ar_query_file_list">查询文件列表</string>
+    <string name="btn_ar_prepare_res">上传图片与点配置</string>
+    <string name="btn_ar_jump_to_home">跳转到Pilot主页</string>
+    <string name="btn_ar_jump_to_map">跳转到Pilot地图</string>
+    <string name="btn_ar_init_ar_config_list">初始化AR配置</string>
+    <string name="btn_ar_query_ar_config">查询AR点配置</string>
+    <string name="btn_ar_upload_ar_config">上传AR点配置</string>
+    <string name="btn_ar_query_ar_info">查询AR点</string>
+    <string name="btn_ar_upload_ar_info">上传AR点</string>
+    <string name="btn_ar_update_ar_info">更新AR点</string>
+     <string name="btn_ar_delete_ar_info">删除AR点</string>
+    <!-- AR Line -->
+    <string name="btn_ar_upload_ar_line">上传AR线</string>
+    <string name="btn_ar_query_ar_line">查询AR线</string>
+    <string name="btn_ar_update_ar_line">更新AR线</string>
+    <string name="btn_ar_delete_ar_line">删除AR线</string>
+    <!-- AR Polygon -->
+    <string name="btn_ar_upload_ar_polygon">上传AR面</string>
+    <string name="btn_ar_query_ar_polygon">查询AR面</string>
+    <string name="btn_ar_update_ar_polygon">更新AR面</string>
+    <string name="btn_ar_delete_ar_polygon">删除AR面</string>
+    <!-- AR Circle -->
+    <string name="btn_ar_upload_ar_circle">上传AR圆</string>
+    <string name="btn_ar_query_ar_circle">查询AR圆</string>
+    <string name="btn_ar_update_ar_circle">更新AR圆</string>
+    <string name="btn_ar_delete_ar_circle">删除AR圆</string>
+    <!-- AR Projection CheckBox Labels -->
+    <string name="cb_ar_hide_all">隐藏全部</string>
+    <string name="cb_ar_hide_icon">隐藏图标</string>
+    <string name="cb_ar_hide_text">隐藏文字</string>
+
+    <string name="item_remote_control_title">远程控制</string>
+    <string name="item_remote_control_description">测试切换 Pilot 主图传画面</string>
+
+    <string name="item_multi_camera_stream_title">多路视频解码 (CameraStreamManager)</string>
+    <string name="item_multi_camera_stream_description">演示如何使用多路图传和多路解码模块</string>
+
+    <string name="item_waypoint_title">航点飞行</string>
+    <string name="item_waypoint_description">演示如何使用航点飞行功能</string>
+
+    <string name="item_virtual_stick_title">虚拟摇杆</string>
+    <string name="item_virtual_description">演示如何使用虚拟摇杆功能</string>
+
+    <string name="item_handheld_title">手持</string>
+    <string name="item_handheld_description">演示如何使用手持相关功能</string>
+
+    <string name="item_diagnostic_title">诊断管理</string>
+    <string name="item_diagnostic_description">演示如何使用诊断相关功能</string>
+
+    <string name="item_live_stream_title">直播管理</string>
+    <string name="item_live_stream_description">演示如何使用直播相关功能</string>
+
+    <string name="item_flight_record_title">飞行日志</string>
+    <string name="item_flight_record_description">演示如何使用飞行日志相关功能</string>
+
+    <string name="item_rtk_title">网络RTK</string>
+    <string name="item_rtk_description">演示如何使用RTK相关功能</string>
+
+    <string name="item_megaphone_title">喊话器</string>
+    <string name="item_megaphone_description">演示如何使用喊话器相关功能</string>
+
+    <string name="item_lte_title">LTE</string>
+    <string name="item_lte_description">演示如何使用LTE相关功能</string>
+
+    <string name="item_fly_safe_title">限飞</string>
+    <string name="item_fly_safe_description">演示如何使用限飞相关功能</string>
+
+    <string name="item_data_protection_title">数据保护</string>
+    <string name="item_data_protection_description">演示如何使用隐私保护相关功能</string>
+
+    <string name="item_simulator_title">模拟器</string>
+    <string name="item_simulator_description">演示如何使用RTK相关功能</string>
+    <string name="btn_enable_simulator">打开飞行模拟器</string>
+    <string name="btn_disable_simulator">关闭飞行模拟器</string>
+    <string name="btn_update_areacode">更新国家码</string>
+    <string name="btn_quick_simulator_area">快速选择模拟地区</string>
+
+    <string name="btn_init_msdk">Init MSDK</string>
+    <string name="btn_unInit_msdk">UnInit MSDK</string>
+    <string name="btn_register_app">激活 App</string>
+    <string name="btn_enable_ldm">开启LDM</string>
+    <string name="btn_disable_ldm">关闭LDM</string>
+    <string name="tip_ldn_choice_title" >请选择LDM例外模块</string>
+    <string name="tip_ldn_choice_confirm" >确定</string>
+    <string name="tip_ldn_choice_cancel" >取消</string>
+
+    <string name="btn_enable_virtual_stick">开启虚拟摇杆</string>
+    <string name="btn_disable_virtual_stick">关闭虚拟摇杆</string>
+    <string name="btn_set_virtual_stick_speed_level">设置Stick模式速度级别</string>
+    <string name="btn_use_rc_stick_value">开始/停止使用遥控摇杆值</string>
+    <string name="set_virtual_stick_advanced_param">设置虚拟摇杆高级模式参数</string>
+    <string name="send_virtual_stick_advanced_param">发送虚拟摇杆高级模式参数</string>
+    <string name="enable_virtual_stick_advanced_mode">开启虚拟摇杆高级模式</string>
+    <string name="disable_virtual_stick_advanced_mode">关闭虚拟摇杆高级模式</string>
+
+    <string name="btn_take_off">起飞</string>
+    <string name="btn_landing">降落</string>
+
+    <string name="btn_start_channel">开启视频通道</string>
+    <string name="btn_close_channel">关闭视频通道</string>
+    <string name="btn_yuv_screen_shot">YUV数据截屏</string>
+    <string name="btn_resume_video">恢复图传</string>
+    <string name="btn_start_socket">开启Socket</string>
+    <string name="btn_close_socket">关闭Socket</string>
+    <string name="btn_start_broadcast">开启广播模式</string>
+    <string name="btn_stop_broadcast">关闭广播模式</string>
+    <string name="btn_switch_source">切换码流源</string>
+
+    <string name="start_pairing">开始对频</string>
+    <string name="stop_pairing">停止对频</string>
+
+    <string name="btn_get_flight_record_path">获取飞行记录存储路径</string>
+    <string name="btn_get_fly_compressed_path">获取飞行精简日志路径</string>
+
+    <string name="n_a">N/A</string>
+    <string name="video_stream_manager">码流管理器</string>
+    <string name="reset_all_video_channel">重置所有视频通道</string>
+    <string name="get_all_video_channel">获取所有视频通道</string>
+    <string name="select_stream_source">选择码流源</string>
+    <string name="confirm">确认</string>
+    <string name="cancel">取消</string>
+
+    <string name="popup_picker_finish">Finish</string>
+    <string name="popup_picker_trigger">Trigger</string>
+
+    <string name="no_product">未连接</string>
+    <string name="wsbridge_ip">WSBridge IP</string>
+    <string name="sdk_version">SDK版本: %1$s</string>
+    <string name="product_name">产品名称: %1$s</string>
+    <string name="is_sdk_debug">Is SDK Debug: %1$s</string>
+    <string name="registration_status">注册状态：%1$s</string>
+    <string name="remote_server_status">远端服务状态：%1$s</string>
+    <string name="package_product_category">包产品类型: %1$s</string>
+    <string name="remote_controller">遥控</string>
+    <string name="unregistered">未注册</string>
+    <string name="registered">已注册</string>
+    <string name="logs">日志</string>
+    <string name="news">通知</string>
+    <string name="showcase">演示用例 &amp; 工具</string>
+    <string name="widget_list">控件列表</string>
+    <string name="testing_tools">测试工具</string>
+    <string name="default_layout">默认演示页面</string>
+    <string name="sdk_forum">SDK 论坛</string>
+    <string name="release_nodes">发布日志</string>
+    <string name="tech_support">技术支持</string>
+
+    <!-- Data Protection -->
+    <string name="switch_product_improvement">用户体验改进计划</string>
+    <string name="switch_msdk_log">MSDK日志开关</string>
+    <string name="switch_product_improvement_on">同意</string>
+    <string name="switch_product_improvement_off">不同意</string>
+    <string name="clear_msdk_log">清除MSDK日志</string>
+
+    <!--Megaphone-->
+    <string name="btn_start_audio_mode">TTS</string>
+    <string name="btn_start_tts_mode">实时语音</string>
+    <string name="btn_file_list">文件列表</string>
+    <string name="upload_status">上传状态</string>
+    <string name="record_btn_title">点击启动录音</string>
+    <string name="btn_realtime_title">点击下方按钮开始实时喊话</string>
+    <string name="btn_press_to_start_record">点击说话</string>
+    <string name="btn_press_to_stop_record">停止</string>
+    <string name="quick_play">快速播放</string>
+    <string name="start_agc">开启AGC算法</string>
+    <string name="btn_send_tts_data">发送TTS数据</string>
+    <string name="title_megaphone">喊话器</string>
+    <string name="megaphone_state">喊话器状态</string>
+    <string name="megaphone_control">喊话器控制</string>
+    <string name="megaphone_warninglight_control">喊话器警示灯控制</string>
+    <string name="megaphone_index">喊话器位置</string>
+    <string name="rt_transmission_status">实时数据传输状态：</string>
+    <string name="btn_tts">文字转语音</string>
+    <string name="btn_rt_voice">实时喊话</string>
+    <string name="btn_record_voice">录音喊话</string>
+    <string name="btn_audio_list">语音列表</string>
+    <string name="cur_volume_value">当前音量:</string>
+
+    <string name="item_upgrade_title">升级</string>
+    <string name="item_upgrade_description">演示如何使用升级相关功能</string>
+
+    <!--Network RTK-->
+    <string name="btn_start_custom_network_rtk_service">开始自定义网络RTK</string>
+    <string name="btn_stop_custom_network_rtk_service">停止自定义网络RTK</string>
+    <string name="btn_set_custom_network_rtk_settings">设置自定义网络RTK账号信息</string>
+    <string name="btn_start_qx_network_rtk_service">开始QX网络RTK</string>
+    <string name="btn_stop_qx_network_rtk_service">停止QX网络RTK</string>
+    <string name="btn_set_qx_network_rtk_coordinate_system">设置千寻网络RTK坐标系</string>
+
+    <!--CMSS RTK-->
+    <string name="btn_start_cmcc_rtk_service">开启CMCC网络RTK</string>
+    <string name="btn_stop_cmcc_rtk_service">停止CMCC网络RTK</string>
+
+    <!--PSDK-->
+    <string name="item_psdk_title">PSDK</string>
+    <string name="item_psdk_description">演示如何使用PSDK相关功能</string>
+    <string name="btn_send_data_to_psdk">发送数据到opsdk</string>
+    <string name="btn_get_data_from_psdk">从psdk接收数据</string>
+    <string name="tv_send_data_to_psdk_hint">请输入发送给PSDK的数据</string>
+    <string name="btn_get_payload_product_name">获取PayLoad产品名称 </string>
+
+    <!--StationRTK-->
+    <string name="item_station_trk_title">基站RTK</string>
+    <string name="item_station_trk_description">演示如何使用基站RTK相关功能</string>
+    <string name="btn_start_search_station">开始搜索基站RTK </string>
+    <string name="btn_stop_search_station">停止搜索基站RTK</string>
+    <string name="btn_login">登录 </string>
+    <string name="btn_set_station_position">设置基站坐标 </string>
+    <string name="btn_get_station_position">获取基站坐标 </string>
+    <string name="btn_reset_station_position">重置基站坐标</string>
+    <string name="btn_reset_station_password">重置基站密码</string>
+    <string name="btn_set_station_name">设置基站名</string>
+    <string name="tv_station_name">基站名称：</string>
+    <string name="tv_station_id">基站ID：</string>
+    <string name="tv_station_signal_level">基站信号强度：</string>
+    <string name="tv_station_battery_current">基站电池电流：</string>
+    <string name="tv_station_battery_voltage">基站电池电压：</string>
+    <string name="tv_station_battery_temperature">基站电池温度：</string>
+    <string name="tv_station_battery_capacity_percent">基站电池容量百分比：</string>
+    <string name="tv_station_location">基站位置：</string>
+    <string name="tv_station_relative_distance">相对距离%1$sm</string>
+    <string name="tv_station_list_tip">请点击下面列表进行基站连接</string>
+    <string name="switch_rtk_type_tip">切换RTK服务类型需要重启飞行器</string>
+
+    <string name="tip_input_station_password">输入密码，注意密码必须由0-9的6个数字组成的字符串，比如“012345”</string>
+    <string name="tip_reset_station_password">重置密码，注意密码必须由0-9的6个数字组成的字符串，比如“012345”</string>
+    <string name="tip_input_station_location">输入基站坐标</string>
+    <string name="tip_change_station_name">修改基站名称,注意：基站名字UTF-8下只取4个字节，比如设置名字为“abcdef”，最后效果是“abcd”</string>
+
+
+    <!--RTK Center-->
+    <string name="item_trk_center_title">RTK Center</string>
+    <string name="item_trk_center_description">演示如何使用RTK相关功能</string>
+    <string name="tv_enable_rtk_hint">1.设置无人机上的RTK模块到开启或者关闭，必须在无人机桨叶起转之前设置，起转之后调用无效。</string>
+    <string name="btn_enable_rtk">打开RTK</string>
+    <string name="btn_disable_rtk">关闭RTK</string>
+    <string name="tv_rtk_enable_hint">2.获取RTK开启状态: </string>
+    <string name="tv_rtk_is_on">RTK已开启</string>
+    <string name="tv_rtk_is_off">RTK已关闭</string>
+    <string name="tv_rtk_source">3.选择RTK服务类型</string>
+    <string name="btn_rtk_source_network">自定义网络RTK</string>
+    <string name="btn_rtk_source_qx">千寻RTK</string>
+    <string name="btn_rtk_source_base_rtk">D-RTK2</string>
+    <string name="btn_rtk_source_cmcc_rtk">CMCC</string>
+    <string name="bt_open_network_rtk">打开网络RTK</string>
+    <string name="bt_open_rtk_station">打开D-RTK2</string>
+    <string name="bt_open_cmcc_rtk">打开CMCC RTK</string>
+    <string name="tv_rtk_precision_preservation_hint">4.当发生RTK模块通信异常时，将自动维持当前RTK状态，但是精度逐渐下降，若超过10分钟未重连，自动退出RTK</string>
+    <string name="bt_turn_on_rtk_precision_preservation">打开RTK精度保持</string>
+    <string name="bt_turn_off_rtk_precision_preservation">关闭RTK精度保持</string>
+    <string name="tv_rtk_precision_preservation_open_status">5.RTK精度保持打开状态：</string>
+    <string name="tv_rtk_precision_preservation_turn_on">RTK精度保持状态已打开</string>
+    <string name="tv_rtk_precision_preservation_turn_off">RTK精度保持状态已关闭</string>
+    <string name="tv_rtk_location_hint">6.RTKLocationInfo信息展示</string>
+    <string name="tv_rtk_location">RTK模块的定位策略：</string>
+    <string name="tv_rtk_station_position">地面端基站的位置: </string>
+    <string name="tv_rtk_mobile_position">RTK模块计算出的无人机位置: </string>
+    <string name="tv_rtk_position_std_distance">地面端基站的位置和RTK模块计算出的无人机位置的距离：</string>
+    <string name="tv_rtk_std_position">RTK模块计算出的无人机位置的标准差: </string>
+    <string name="tv_rtk_head">RTK模块计算出的无人机朝向数据：</string>
+    <string name="tv_rtk_real_head">无人机经过飞控融合算法计算后的朝向数据: </string>
+    <string name="tv_rtk_real_location">无人机经过飞控融合算法计算后的位置数据: </string>
+    <string name="tv_rtk_systemState_info_hint">7.RTKSystemState信息展示: </string>
+    <string name="tv_rtk_connect">飞控与机身RTK连接状态: </string>
+    <string name="tv_rtk_healthy">飞行器的RTK模块的健康状态: </string>
+    <string name="tv_rtk_keep_status">RTK精度保持开启状态: </string>
+    <string name="tv_rtk_error">RTK模块错误信息: </string>
+    <string name="tv_rtk_antenna_1">无人机RTK模块的天线1搜索到的卫星数: </string>
+    <string name="tv_rtk_antenna_2">无人机RTK模块的天线2搜索到的卫星数: </string>
+    <string name="tv_rtk_station">RTK搜索到的卫星数: </string>
+
+    <string name="btn_mission_uploadkmz">上传KMZ文件</string>
+    <string name="btn_mission_start">开始任务</string>
+    <string name="btn_mission_pause">暂停任务</string>
+    <string name="btn_mission_resume">恢复任务</string>
+    <string name="btn_mission_query">查询断点</string>
+    <string name="btn_mission_resume_with_bp">恢复任务(BPInfo)</string>
+    <string name="btn_mission_wayline_select">选择航线ID</string>
+    <string name="btn_mission_breakinfo_resume">从断点开始任务</string>
+    <string name="btn_mission_stop">结束任务</string>
+
+    <!--登录-->
+    <string name="btn_login_account">带UI的账户登录 </string>
+    <string name="btn_user_login">不带UI的账户登录(支持手机号码或者邮箱登录)</string>
+    <string name="btn_logout_account">登出账户 </string>
+    <string name="btn_get_login_info">获取已登录的用户信息 </string>
+    <string name="tv_login_state">当前登录状态: </string>
+    <string name="tv_login_account">当前登录用户名: </string>
+    <string name="tv_login_error">登录模块错误: </string>
+    <string name="tv_verification_code">验证码: </string>
+    <string name="item_login_account_title">登录账号</string>
+    <string name="item_login_account_description">演示DJI账户登录相关功能</string>
+
+    <!--感知-->
+    <string name="item_perception_title">感知</string>
+    <string name="item_perception_description">演示如何使用感知的相关功能</string>
+    <string name="bt_set_obstacle_avoidance_sub_switch">1.设置特定方向的避障开启状态：</string>
+    <string name="tv_sense_switch_status">感知开关状态：</string>
+    <string name="bt_set_obstacle_avoidance_upwrard_switch">上</string>
+    <string name="bt_set_obstacle_avoidance_down_switch">下</string>
+    <string name="bt_set_obstacle_avoidance_horizontal_switch">水平</string>
+    <string name="tv_radar_switch_status">雷达开关状态：</string>
+    <string name="bt_set_radar_obstacle_avoidance_upwrard_switch">上</string>
+    <string name="bt_set_radar_obstacle_avoidance_horizontal_switch">水平</string>
+    <string name="bt_set_vision_positioning_enable_tip">2.视觉定位开启状态：</string>
+    <string name="bt_set_precision_landing_enable_tip">3.精准降落开启状态：</string>
+    <string name="tv_other_obstacle_avoidance_tip">4.其他避障信息展示： </string>
+    <string name="bt_set_obstacle_avoidance_type">设置避障类型</string>
+    <string name="bt_set_obstacle_avoidance_warning_distance">设置特定方向的告警距离</string>
+    <string name="bt_set_obstacle_avoidance_braking_distance">设置特定方向的刹停距离</string>
+
+
+
+    <!--MOP-->
+    <string name="item_mop_title">MOP</string>
+    <string name="item_mop_description">演示如何使用MOP相关功能</string>
+    <string name="btn_connect" >连接MOP链路</string>
+    <string name="btn_disconnect" >断开MOP链路</string>
+
+    <!--机载数据安全-->
+    <string name="item_security_code_title">安全密码</string>
+    <string name="item_security_code_description">演示如何使用安全密码相关功能</string>
+    <string name="btn_verify_password">验证密码</string>
+    <string name="btn_modify_password">修改密码</string>
+    <string name="btn_reset_password">重置密码</string>
+    <string name="btn_set_password">设置密码</string>
+    <string name="tip_set_password">密码长度至少4位，建议使用数字,大写、小写字母组成密码</string>
+    <string name="tip_set_password_fail">当前设备SD卡不支持加密</string>
+    <string name="tip_verify_password_fail">当前设备SD卡无需解密</string>
+    <string name="tip_reset_password">重置安全密码将会格式化SD卡，请确认媒体数据已备份</string>
+    <string name="tip_set_password_not_support">当前设备SD不支持加密，无法设置密码</string>
+    <string name="tip_has_set_password_already">当前设备SD已设置密码，无法继续设置密码。您可以选择修改密码或者重置密码</string>
+    <string name="tip_modify_password_not_support">当前设备SD还未设置密码，请先设置密码</string>
+    <string name="tip_device_type">MASTER表示飞机，SLAVE1表示左云台，SLAVE2表示右云台，SLAVE3表示上云台\n。Port上，Port_1表示SLAVE1，Port_2表示SLAVE2，.. ，Port_8表示SLAVE8。</string>
+
+    <string name="securitycode_operation_result_success">操作成功</string>
+    <string name="securitycode_operation_result_running">系统繁忙，请稍后再试</string>
+    <string name="securitycode_operation_result_busy">系统繁忙，请稍后再试</string>
+    <string name="securitycode_operation_result_set_failed">密码设置失败，请重试</string>
+    <string name="securitycode_operation_result_verify_failed">密码验证失败</string>
+    <string name="securitycode_operation_result_new_pw_repeat">新密码与旧密码重复，请重新设置</string>
+    <string name="securitycode_operation_result_reset_failed">取消密码失败，请重试</string>
+    <string name="securitycode_operation_result_not_current_device_result">非当前设备错误</string>
+    <string name="securitycode_operation_result_unknown">未知错误</string>
+    <string name="securitycode_operation_result_user_name_format_invalid">用户名格式无效</string>
+    <string name="securitycode_operation_result_control_not_support">操作类型不支持</string>
+    <string name="securitycode_operation_result_feature_not_support">功能不支持</string>
+    <string name="securitycode_operation_result_command_not_support">命令不支持</string>
+
+
+    <!--UAS-->
+    <string name="item_uas_title">无人机远程识别</string>
+    <string name="item_uas_description">演示如何使用无人机远程识别相关功能</string>
+    <string name="bt_set_eid_enable">Set electronicId enabled</string>
+    <string name="bt_set_ua_registration_number">Set ua registration number</string>
+    <string name="m3e_little_battery_connceted">DJI Mavic 3 行业系列电池（欧盟 C1 版）</string>
+
+    <!-- key类型 -->
+    <string name="key_type_battery">battery key</string>
+    <string name="key_type_gimbal">gimbal key</string>
+    <string name="key_type_camera">camera key</string>
+    <string name="key_type_wifi">WiFi key</string>
+    <string name="key_type_ble">BLE key</string>
+    <string name="key_type_product">Product key</string>
+    <string name="key_type_rtk_base">RTK Base Station Key</string>
+    <string name="key_type_rtk_mobile">RTK Mobile Station Key</string>
+    <string name="key_type_ocu_sync">OcuSync Key</string>
+    <string name="key_type_radar">Radar Key</string>
+    <string name="key_type_app">App Key</string>
+    <string name="key_type_camera_action">action key</string>
+    <string name="key_type_camera_listen">listen key</string>
+    <string name="key_type_camera_get_set">set、get key</string>
+    <string name="home_operate_disconnected_tips">设备尚未连接</string>
+    <string name="operate_case_filter">条件过滤</string>
+    <string name="operate_select_item_for_setting">点击条目设置</string>
+    <string name="operate_listen_record_tips">push info：</string>
+    <string name="operate_pls_select_key_first_tips">请先选择左侧列表中的Key</string>
+
+    <string name="battery">电池</string>
+    <string name="batterybox">电池箱</string>
+    <string name="bigbattery">大电池</string>
+    <string name="gimbal">云台</string>
+    <string name="camera">相机</string>
+    <string name="wifi">WiFi</string>
+    <string name="ble">BLE</string>
+    <string name="airlink">AIRLINK</string>
+    <string name="flight_assistant">FlightAssistant</string>
+    <string name="flight_control">FlightController</string>
+
+    <string name="product">Product</string>
+    <string name="app_key">AppKey</string>
+    <string name="rtkbase">RTK基站</string>
+    <string name="rtkmobile">RTK移动站</string>
+    <string name="ocusync">OcuSync</string>
+    <string name="radar">Radar</string>
+    <string name="mobile_network">Mobile Network</string>
+    <string name="on_board">OnBoard</string>
+    <string name="payload">Payload</string>
+    <string name="lidar">Lidar</string>
+    <string name="intelligent_box">Intelligent Box</string>
+    <string name="key">Key 列表</string>
+    <string name="key_search">搜索</string>
+    <string name="commonlyused_key">常用Key</string>
+    <string name="key_value_set">设置 </string>
+    <string name="index_tips">index:表示负载的位置一般为0 \n subType:表示镜头 0 = zoom ，1 = wide ， 2 = ir \n subIndex:目前只有电池箱用到表示下一级小配件位置</string>
+
+    <!-- Log Info -->
+    <string name="btn_get_latest_log_info">刷新崩溃日志信息</string>
+    <string name="item_log_info_title">崩溃日志信息</string>
+    <string name="item_log_info_description">描述如何获取崩溃日志信息</string>
+    <string name="btn_test_java_crash">测试Java崩溃</string>
+    <string name="btn_test_native_crash">测试Native崩溃</string>
+
+    <!-- Live Stream -->
+    <string name="btn_set_live_stream_config">设置直播配置</string>
+    <string name="btn_get_live_stream_config">获取直播配置</string>
+    <string name="btn_start_live_stream">开始直播</string>
+    <string name="btn_stop_live_stream">关闭直播</string>
+    <string name="btn_set_live_stream_channel_type">设置直播通道类型</string>
+    <string name="btn_get_live_stream_channel_type">获取直播通道类型</string>
+    <string name="btn_set_live_stream_quality">设置直播画质</string>
+    <string name="btn_get_live_stream_quality">获取直播画质</string>
+    <string name="btn_set_live_stream_bit_rate_mode">设置直播比特率模式</string>
+    <string name="btn_get_live_stream_bit_rate_mode">获取直播比特率模式</string>
+    <string name="btn_set_live_stream_bit_rate">设置直播比特率</string>
+    <string name="btn_get_live_stream_bit_rate">获取直播比特率</string>
+    <string name="btn_enable_audio">开启声音</string>
+    <string name="btn_disable_audio">关闭声音</string>
+    <string name="ad_select_live_stream_type">选择直播类型</string>
+    <string name="ad_select_live_stream_channel_type">选择直播通道类型</string>
+    <string name="ad_select_live_stream_bit_rate_mode">选择直播比特率模式</string>
+    <string name="ad_select_live_stream_quality">选择直播质量</string>
+    <string name="ad_set_live_stream_bit_rate">设置直播比特率</string>
+
+    <string name="ad_set_live_stream_rtmp_config">RTMP配置</string>
+    <string name="ad_set_live_stream_rtsp_config">RTSP配置</string>
+    <string name="ad_set_live_stream_gb28181_config">GB28181配置</string>
+    <string name="ad_set_live_stream_agora_config">Agora配置</string>
+
+    <string name="ad_confirm">确认</string>
+    <string name="ad_cancel">取消</string>
+
+    <string name="msg_start_live_stream_success">开启直播成功！</string>
+    <string name="msg_start_live_stream_failed">开启直播失败: %1$s</string>
+    <string name="msg_stop_live_stream_success">停止直播成功!</string>
+    <string name="msg_stop_live_stream_failed">停止直播失败: %1$s</string>
+
+    <string name="item_media_playback_title">多媒体文件</string>
+    <string name="item_media_playback_description">演示如何使用多媒体相关功能</string>
+
+    <string name="msg_download_compelete_tips">下载完成平均下载速度</string>
+    <string name="msg_download_save_tips">文件保存在</string>
+
+    <string name="delete_files">删除文件</string>
+    <string name="select_files">选择文件</string>
+    <string name="set_xmp_custom_info">设置XMP自定义消息</string>
+    <string name="get_xmp_custom_info">读取XMP自定义消息</string>
+    <string name="unselect_files">取消选择</string>
+    <string name="fetch_files_list">获取文件列表</string>
+    <string name="take_photo">拍照</string>
+    <string name="already_download">文件已下载</string>
+
+    <!-- LTE -->
+    <string name="btn_update_lte_authentication_info">更新LTE认证信息</string>
+    <string name="btn_get_lte_authentication_verification_code">读取LTE认证验证码</string>
+    <string name="btn_start_lte_authentication">开始LTE认证</string>
+    <string name="btn_set_lte_enhanced_transmission_type">设置LTE增强传输类型</string>
+    <string name="btn_get_lte_enhanced_transmission_type">读取LTE增强传输类型</string>
+    <string name="btn_set_lte_ac_privatization_server_info">设置飞机私有化信息</string>
+    <string name="btn_set_lte_rc_privatization_server_info">设置遥控私有化信息</string>
+    <string name="btn_clear_lte_ac_privatization_server_info">清除飞机私有化信息</string>
+    <string name="btn_clear_lte_rc_privatization_server_info">清除遥控私有化信息</string>
+
+    <!-- Fly Safe -->
+    <string name="btn_btn_hide_or_show_all_fly_zone_info">隐藏/显示FlyZone信息</string>
+    <string name="btn_get_fly_zones_in_surrounding_area">读取附近(50000M)限飞区信息</string>
+    <string name="btn_download_fly_zone_licenses_from_server">下载服务器限飞证书</string>
+    <string name="btn_push_fly_zone_licenses_to_aircraft">推送限飞证书到飞机</string>
+    <string name="btn_pull_fly_zone_licenses_from_aircraft">读取飞机上的限飞证书</string>
+    <string name="btn_delete_fly_zone_licenses_from_aircraft">删除飞机上的限飞证书</string>
+    <string name="btn_set_fly_zone_licenses_enabled">启用/停用限飞证书</string>
+    <string name="btn_unlock_authorization_fly_zone">解禁授权区</string>
+    <string name="btn_unlock_enhanced_warning_fly_zone">解禁加强警告区</string>
+    <string name="btn_unlock_all_enhanced_warning_fly_zone">解禁全部加强警告区</string>
+
+    <!-- Camera preview -->
+    <string name="title_select_yuv_format">选择图片格式</string>
+    <string name="title_select_yuv_format_ok">确定</string>
+    <string name="title_select_yuv_format_cancel">取消</string>
+
+    <!-- Look at preview -->
+    <string name="item_look_at_title">Look At</string>
+    <string name="item_look_at_description">演示如何使用Look At相关功能</string>
+
+    <!-- Intelligent Flight preview -->
+    <string name="item_intelligent_flight_title">智能飞行</string>
+    <string name="item_intelligent_flight__description">演示如何使用智能飞行相关功能</string>
+
+    <!-- app silently upgrade preview -->
+    <string name="item_app_silently_upgrade_title">APP静默升级</string>
+    <string name="item_app_silently_upgrade_description">演示如何使用APP静默升级相关功能</string>
+    <string name="btn_silently_upgrade_package">设置静默升级的APP包名</string>
+    <string name="btn_install_test_app">安装测试APP</string>
+
+    <!-- plugin preview -->
+    <string name="item_normal_title">基础插件功能</string>
+    <string name="item_normal_description">演示如何使用基础插件功能</string>
+
+    <!-- Open Pilot Plugin -->
+    <string name="dji_open_pilot_plugin_name">示例插件 5</string>
+    <string name="dji_open_pilot_plugin_description">用于演示 DJI Open Pilot 集成的示例插件 5</string>
+    <string name="dji_open_pilot_plugin_developer">DJI Inc.</string>
+
+    <!-- cable_inspection preview -->
+    <string name="item_cable_inspection_title">导线巡检功能</string>
+    <string name="item_cable_inspection_description">演示如何使用导线巡检功能</string>
+
+    <!-- frag_normal_plugin_page 按钮 -->
+    <string name="btn_query_file_list_from_remote">查询图片资源</string>
+    <string name="btn_push_file_list_to_remote">推送文件</string>
+    <string name="btn_prepare_res">推送图片资源</string>
+    <string name="btn_add_map_widget">添加地图控件</string>
+    <string name="btn_layer_scene_add_layer">[Layer]创建图层(LayerA+LayerB)</string>
+    <string name="btn_add_layer_a_widgets">[Layer]批量添加LayerA(Marker+Polygon)</string>
+    <string name="btn_add_layer_b_widgets">[Layer]批量添加LayerB(Marker+Polyline+Circle)</string>
+    <string name="btn_update_layer_a_batch">[Layer]批量更新LayerA位置</string>
+    <string name="btn_toggle_layer_a_visible">[Layer]切换LayerA显隐</string>
+    <string name="btn_toggle_layer_b_visible">[Layer]切换LayerB显隐</string>
+    <string name="btn_query_all_widgets">[Layer]查询所有widget</string>
+    <string name="btn_query_layer_a">[Layer]查询LayerA widget</string>
+    <string name="btn_clear_layer_a">[Layer]清空LayerA</string>
+    <string name="btn_remove_layer_a">[Layer]删除LayerA</string>
+    <string name="btn_add_map_widget_callback">[Layer]添加单个widget(带cb)</string>
+    <string name="btn_remove_one_layer_a_widget">[Layer]删除单个widget(带cb)</string>
+    <string name="btn_remove_layer_a_batch">[Layer]批量删除LayerA前2个</string>
+    <string name="btn_query_map_element">查询地图元素</string>
+    <string name="btn_init_open_box_sample_view">加载组件示例</string>
+    <string name="btn_init_property_sample_view">加载属性示例</string>
+    <string name="btn_init_wrap_content_sample_view">自适应高度示例</string>
+    <string name="btn_hide_ar_annotations">隐藏 AR 标注</string>
+    <string name="btn_add_map_element">添加地图元素</string>
+    <string name="btn_update_map_element">更新地图元素</string>
+    <string name="btn_delete_map_element">删除地图元素</string>
+    <string name="btn_jump_to_home">跳转 Pilot 默认页</string>
+    <string name="btn_jump_to_map">跳转 Pilot 地图页</string>
+    <string name="btn_jump_to_waypoint_mission_list">跳转航点任务列表</string>
+    <string name="btn_jump_to_album">跳转 Pilot 相册</string>
+    <string name="btn_jump_to_plugin_marketplace">跳转 Pilot 插件商城</string>
+    <string name="btn_move_modeling_file_to_public">移动建模文件到公共目录</string>
+    <string name="btn_update_open_drawing_box">更新绘图框</string>
+    <string name="btn_clear_open_drawing_box">清除绘图框</string>
+    <string name="btn_update_open_polygon_drawing">更新多边形绘制</string>
+    <string name="btn_clear_open_polygon_drawing">清除多边形绘制</string>
+    <string name="btn_update_open_text_drawing">更新文字叠加</string>
+    <string name="btn_clear_open_text_drawing">清除文字叠加</string>
+    <string name="btn_dialog_service_list">对话框</string>
+    <string name="btn_init_remote_view_property_demo">初始化属性演示视图</string>
+    <string name="btn_register_disconnect_landing">注册断连降落</string>
+    <string name="btn_clear_disconnect_actions">清除断连操作</string>
+    <string name="btn_push_screenshot_to_app_log">推送截屏到远端 APP 日志</string>
+
+    <!-- remote view i18n sample -->
+    <string name="remote_sample_output_label">输出: </string>
+    <string name="remote_sample_btn_test">按键测试: </string>
+    <string name="remote_sample_btn_1">按键1</string>
+    <string name="remote_sample_btn_2">按键2</string>
+    <string name="remote_sample_switch_test">开关测试: </string>
+    <string name="remote_sample_switch_desc">开关描述</string>
+    <string name="remote_sample_checkbox_test">复选框测试: </string>
+    <string name="remote_sample_checkbox_option">选项</string>
+    <string name="remote_sample_edit_text_label">编辑文本: </string>
+    <string name="remote_sample_change_image">切换图片</string>
+    <string name="remote_sample_full_screen">切换全屏</string>
+    <string name="remote_sample_web_test">WebView测试: </string>
+    <string name="remote_sample_load_web">加载网页</string>
+    <string name="remote_sample_spinner_test">下拉框测试: </string>
+    <string name="remote_sample_spinner_opt_1">选项1</string>
+    <string name="remote_sample_spinner_opt_2">选项2</string>
+    <string name="remote_sample_spinner_opt_3">选项3</string>
+    <string name="remote_sample_list_test">列表测试: </string>
+    <string name="remote_sample_list_insert">插入Item</string>
+    <string name="remote_sample_list_remove">删除Item</string>
+
+    <!-- remote view i18n sample - callback output -->
+    <string name="remote_sample_cb_btn1_clicked">按键1被点击</string>
+    <string name="remote_sample_cb_btn2_clicked">按键2被点击</string>
+    <string name="remote_sample_cb_switch">开关状态: %1$s，控件类型: %2$s</string>
+    <string name="remote_sample_cb_checkbox">复选框状态: %1$s，控件类型: %2$s</string>
+    <string name="remote_sample_cb_edit_text">输入内容: %s</string>
+    <string name="remote_sample_cb_web_load">加载网页: %s</string>
+    <string name="remote_sample_cb_spinner">下拉选中: %1$s（序号=%2$s）</string>
+    <string name="remote_sample_cb_image_clicked">图片被点击</string>
+    <string name="remote_sample_cb_list_click">列表点击: 位置=%1$s，ID=%2$s</string>
+    <string name="remote_sample_cb_list_inserted">已插入: 新Item #%s 到位置0</string>
+    <string name="remote_sample_cb_list_removed">已删除位置0的Item</string>
+
+    <!-- MSDKManagerVM -->
+    <string name="msdk_btn_jump_to_msdk">跳转MSDK插件</string>
+
+    <!-- remote sample list items -->
+    <string name="remote_sample_list_item_text">纯文本Item</string>
+    <string name="remote_sample_list_item_normal_icon">风机正常图标</string>
+    <string name="remote_sample_list_item_clicked_icon">风机选中图标</string>
+    <string name="remote_sample_list_item_m4e_title">Matrice 4E</string>
+    <string name="remote_sample_list_item_m4e_subtitle">工业无人机</string>
+    <string name="remote_sample_list_item_m3m_title">Mavic 3M</string>
+    <string name="remote_sample_list_item_m3m_subtitle">多光谱无人机</string>
+    <string name="remote_sample_list_item_rc">遥控器</string>
+    <string name="remote_sample_list_item_divider">--- 分隔线 ---</string>
+    <string name="remote_sample_list_item_care">DJI Care</string>
+    <string name="remote_sample_list_item_battery_title">电池电量</string>
+    <string name="remote_sample_list_item_battery_subtitle">86%</string>
+    <string name="remote_sample_list_new_item">新增Item #%s</string>
+
+    <!-- dialog i18n sample -->
+    <string name="dialog_sample_output_label">回调结果: </string>
+    <string name="dialog_sample_output_placeholder">这里将显示回调结果</string>
+    <string name="dialog_sample_type_label">对话框类型: </string>
+    <string name="dialog_sample_btn_alert">提示框</string>
+    <string name="dialog_sample_btn_confirm">确认框</string>
+    <string name="dialog_sample_btn_prompt">输入框</string>
+    <string name="dialog_sample_btn_single">单选框</string>
+    <string name="dialog_sample_btn_multi">多选框</string>
+    <string name="dialog_alert_title">Pilot 提示框</string>
+    <string name="dialog_alert_message">这是一台Matrice 4</string>
+    <string name="dialog_confirm_title">Pilot 确认框</string>
+    <string name="dialog_confirm_message">这是一台Matrice 4吗？</string>
+    <string name="dialog_confirm_btn_no">不是</string>
+    <string name="dialog_confirm_btn_yes">是的</string>
+    <string name="dialog_prompt_title">Pilot 输入框</string>
+    <string name="dialog_prompt_message">请输入您的设备名称：</string>
+    <string name="dialog_single_title">Pilot 单选框</string>
+    <string name="dialog_single_message">请选择您最喜欢的大疆产品：</string>
+    <string name="dialog_multi_title">Pilot 多选框</string>
+    <string name="dialog_multi_message">请选择您体验过的大疆产品：</string>
+    <string name="dialog_btn_cancel">取消</string>
+    <string name="dialog_btn_confirm">确认</string>
+    <string name="dialog_already_exists">对话框已存在，请不要反复添加</string>
+    <string name="remote_sample_perf_test">性能测试</string>
+    <string name="remote_sample_perf_test_stop">停止测试</string>
+    <string name="remote_sample_perf_test_starting">性能测试开始...</string>
+    <string name="remote_sample_perf_test_running">性能测试中...\n轮次: %d\n耗时: %dms\n平均: %sms/次\n速度: %sMB/s</string>
+    <string name="remote_sample_perf_test_done">性能测试完成!\n总轮次: %d\n总耗时: %dms\n总读写: %dMB\n速度: %sMB/s</string>
+</resources>

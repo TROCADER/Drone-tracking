@@ -26,3 +26,6 @@ project(':open-pilot-gasdetection-sample:psdk-bridge').projectDir = new File(roo
 
 include ':uxsdk'// uxsdk模块
 project(':uxsdk').projectDir = new File(rootProject.projectDir, '../android-sdk-v5-uxsdk')
+
+include ':dronetrack'// Own app
+project(':dronetrack').projectDir = new File(rootProject.projectDir, '../android-sdk-v5-dronetrack')
