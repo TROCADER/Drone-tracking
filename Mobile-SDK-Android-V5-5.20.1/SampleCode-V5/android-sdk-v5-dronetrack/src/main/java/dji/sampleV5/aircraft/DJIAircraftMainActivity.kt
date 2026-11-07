@@ -22,7 +22,8 @@ class DJIAircraftMainActivity : DJIMainActivity() {
         GlobalPreferencesManager.initialize(DefaultGlobalPreferences(this))
         GeoidManager.getInstance().init(this)
 
-        enableDefaultLayout(DefaultLayoutActivity::class.java)
+        // enableDefaultLayout(DefaultLayoutActivity::class.java)
+        enableDefaultLayout(CameraActivity::class.java)
         enableWidgetList(WidgetsActivity::class.java)
     }
 

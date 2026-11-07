@@ -98,3 +98,5 @@ android-sdk-v5-ivt/tools/results/
 
 .idea/
 .userinfo
+
+gradle.properties
