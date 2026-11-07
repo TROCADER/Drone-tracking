@@ -45,6 +45,7 @@ class CameraActivity : AppCompatActivity() {
     private var seekBarConfidence: SeekBar? = null
     private var confidenceLabel: TextView? = null
 
+    private var detectionOverlayView: DetectionOverlay? = null
     private val detector: Detector = Detector()
     private var detectionActive: Boolean = false
     private var trackingActive: Boolean = false
@@ -74,7 +75,8 @@ class CameraActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.camera_view)
 
-        // Load detector model asynchronously in background
+        detectionOverlayView = findViewById(R.id.detection_overlay)
+
         Thread {
             detector.loadModel(applicationContext)
         }.start()
@@ -112,6 +114,7 @@ class CameraActivity : AppCompatActivity() {
                 startFrameCapture()
             } else {
                 stopFrameCapture()
+                detectionOverlayView?.clear()
             }
         }
 
@@ -124,33 +127,21 @@ class CameraActivity : AppCompatActivity() {
         if (!detectionActive)
             return@CameraFrameListener
 
-        // Create Bitmap from RGBA frame bytes
         val bitmap: Bitmap = createBitmap(width, height)
         bitmap.copyPixelsFromBuffer(ByteBuffer.wrap(frameData, offset, length))
 
-        // Scale to detector input size (320x320)
         val scaledBitmap: Bitmap = bitmap.scale(320, 320)
         bitmap.recycle()
 
-        // Run object detection
         val result = detector.detect(scaledBitmap)
         scaledBitmap.recycle()
 
-        // Update UI / PID controller on main thread
+        // TODO: Update PID controller on main thread
         mainHandler.post {
             if (result.success) {
-//                detectionOverlayView?.setTargets(result.targets)
-//                if (trackingController.isTrackingEnabled()) {
-//                    if (!result.targets.isNullOrEmpty()) {
-//                        trackingController.setGimbal(getGimbal())
-//                        trackingController.updateTarget(result.targets[0].rect)
-//                    } else {
-//                        trackingController.updateTarget(null)
-//                    }
-//                }
-                Log.d("Detection", "Success")
-            }
-            else {
+                detectionOverlayView?.setTargets(result.targets)
+                Log.d("Detection", "Success: ${result.targets.size} targets")
+            } else {
                 Log.d("Detection", "Failure: ${result.errorMessage}")
             }
         }
