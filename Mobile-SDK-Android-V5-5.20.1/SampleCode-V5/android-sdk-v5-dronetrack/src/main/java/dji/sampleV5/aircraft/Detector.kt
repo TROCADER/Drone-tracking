@@ -32,6 +32,10 @@ class Detector {
         this.confidenceThreshold = threshold
     }
 
+    fun setIouThreshold(threshold: Float) {
+        this.iouThreshold = threshold
+    }
+
     class NmsBox(val rect: RectF, val score: Float, val classId: Int, val label: String)
 
     data class TargetBox(val rect: RectF, val label: String, val score: Float)
