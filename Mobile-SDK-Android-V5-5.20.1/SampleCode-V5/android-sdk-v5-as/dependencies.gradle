@@ -100,4 +100,6 @@ ext {
     deps.rxJava = deps.rx2Java
     deps.rxAndroid = "io.reactivex.rxjava2:rxandroid:2.1.1"
     deps.rxjava2_rxkotlin = "io.reactivex.rxjava2:rxkotlin:2.2.0"
+
+    deps.executorch = "org.pytorch:executorch-android:1.5.1"
 }
