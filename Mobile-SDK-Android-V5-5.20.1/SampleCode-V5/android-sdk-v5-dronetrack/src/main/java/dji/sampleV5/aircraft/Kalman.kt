@@ -23,6 +23,7 @@ class Kalman {
     private var matrixQ: NDArray<Double, D2>? = null
 
     // Translated from scipy.linalg.block_diag
+    // https://github.com/scipy/scipy/blob/v1.18.0/scipy/linalg/_special_matrices.py#L361-L451
     fun <T : Number> blockDiag(
         vararg arrs: MultiArray<T, out Dimension>,
         dtype: DataType = DataType.DoubleDataType
@@ -87,6 +88,9 @@ class Kalman {
         return out
     }
 
+    // Translated from filterpy.common.discretization.Q_discrete_white_noise
+    // https://filterpy.readthedocs.io/en/latest/_modules/filterpy/common/discretization.html#Q_discrete_white_noise
+    // https://github.com/rlabbe/filterpy/blob/master/filterpy/common/discretization.py#L70-L145
     fun qDiscreteWhiteNoise(
         dim: Int,
         dt: Double = 1.0,
