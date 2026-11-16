@@ -229,4 +229,6 @@ class GimbalController(val activity: CameraActivity) {
 
         sendGimbalSpeed(pitchSpeed, yawSpeed, 0.0)
     }
+
+
 }

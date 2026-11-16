@@ -22,7 +22,6 @@
         android:icon="@mipmap/ic_launcher"
         android:label="@string/my_app_name"
         android:requestLegacyExternalStorage="true"
-        android:extractNativeLibs="true"
         android:supportsRtl="true"
         android:usesCleartextTraffic="true"
         tools:replace="android:usesCleartextTraffic"

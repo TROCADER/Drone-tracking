@@ -49,6 +49,9 @@ android {
         // 与其他库重复引用了，因此选其中一个即可
         pickFirst 'lib/arm64-v8a/libc++_shared.so'
         pickFirst 'lib/armeabi-v7a/libc++_shared.so'
+        jniLibs {
+            useLegacyPackaging true
+        }
     }
 
     compileOptions {
@@ -136,4 +139,5 @@ dependencies {
     implementation deps.lynx
 
     implementation deps.executorch
+    implementation deps.multik
 }

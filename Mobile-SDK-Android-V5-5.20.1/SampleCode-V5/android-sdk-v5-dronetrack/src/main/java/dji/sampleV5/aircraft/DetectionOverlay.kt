@@ -10,9 +10,7 @@ import java.util.Locale
 import kotlin.math.min
 
 class DetectionOverlay @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
     private val boxPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -107,9 +105,7 @@ class DetectionOverlay @JvmOverloads constructor(
                 canvas.drawLine(right, bottom, right, bottom - cornerLen, cornerPaint)
 
                 val labelText = String.format(
-                    Locale.US, "%s %.0f%%",
-                    label.uppercase(Locale.US),
-                    score * 100.0f
+                    Locale.US, "%s %.0f%%", label.uppercase(Locale.US), score * 100.0f
                 )
 
                 val textWidth = textPaint.measureText(labelText)

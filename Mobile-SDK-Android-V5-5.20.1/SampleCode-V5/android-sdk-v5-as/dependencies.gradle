@@ -102,4 +102,5 @@ ext {
     deps.rxjava2_rxkotlin = "io.reactivex.rxjava2:rxkotlin:2.2.0"
 
     deps.executorch = "org.pytorch:executorch-android:1.5.1"
+    deps.multik = "org.jetbrains.kotlinx:multik-kotlin:0.3.1"
 }

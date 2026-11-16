@@ -36,9 +36,18 @@ class Detector {
         this.iouThreshold = threshold
     }
 
-    class NmsBox(val rect: RectF, val score: Float, val classId: Int, val label: String)
+    class NmsBox(
+        val rect: RectF,
+        val score: Float,
+        val classId: Int,
+        val label: String
+    )
 
-    data class TargetBox(val rect: RectF, val label: String, val score: Float)
+    data class TargetBox(
+        val rect: RectF,
+        val label: String,
+        val score: Float
+    )
 
     @Throws(IOException::class)
     fun assetFilePath(context: Context, assetName: String): String {
@@ -80,11 +89,7 @@ class Detector {
 
         override fun toString(): String {
             return String.format(
-                Locale.US,
-                "%s (#%d): %.1f%%",
-                title,
-                classIndex,
-                confidence * 100.0f
+                Locale.US, "%s (#%d): %.1f%%", title, classIndex, confidence * 100.0f
             )
         }
     }
@@ -97,9 +102,7 @@ class Detector {
         val errorMessage: String?
 
         constructor(
-            targets: List<TargetBox>?,
-            topRecognitions: List<Recognition>?,
-            inferenceTimeMs: Long
+            targets: List<TargetBox>?, topRecognitions: List<Recognition>?, inferenceTimeMs: Long
         ) {
             this.targets = targets ?: emptyList()
             this.topRecognitions = topRecognitions ?: emptyList()
@@ -138,8 +141,7 @@ class Detector {
             bitmapToFloatBuffer(scaledBitmap, inTensorBuffer)
 
             val inputTensor = fromBlob(
-                inTensorBuffer,
-                longArrayOf(1, 3, INPUT_SIZE.toLong(), INPUT_SIZE.toLong())
+                inTensorBuffer, longArrayOf(1, 3, INPUT_SIZE.toLong(), INPUT_SIZE.toLong())
             )
 
             val startTime = System.currentTimeMillis()
@@ -178,10 +180,7 @@ class Detector {
                         val y2 = (boxesData[i * 4 + 3] / INPUT_SIZE).toDouble().coerceIn(0.0, 1.0)
 
                         val rect = RectF(
-                            min(x1, x2),
-                            min(y1, y2),
-                            max(x1, x2),
-                            max(y1, y2)
+                            min(x1, x2), min(y1, y2), max(x1, x2), max(y1, y2)
                         )
                         rawBoxes.add(NmsBox(rect, maxScore, maxClassId, "Target"))
                     }
@@ -212,17 +211,14 @@ class Detector {
                 val fallbackRect = RectF(0.25, 0.20, 0.75, 0.80)
                 targetBoxes.add(
                     TargetBox(
-                        fallbackRect,
-                        "Target",
-                        max(0.25f, top.confidence)
+                        fallbackRect, "Target", max(0.25f, top.confidence)
                     )
                 )
             }
 
 //            Should be 1 as long as cap is enabled
             Log.d(
-                TAG,
-                "Detection completed in $elapsedTime ms, targets found: ${targetBoxes.size}"
+                TAG, "Detection completed in $elapsedTime ms, targets found: ${targetBoxes.size}"
             )
             return DetectionResult(targetBoxes, topRecognitions, elapsedTime)
         } catch (t: Throwable) {
