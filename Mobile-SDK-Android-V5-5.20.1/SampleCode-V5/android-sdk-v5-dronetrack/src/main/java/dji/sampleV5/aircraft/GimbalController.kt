@@ -27,28 +27,9 @@ class GimbalController(val activity: CameraActivity) {
     val gimbalMaxDegYawLeft: Double = -30.0
     val gimbalMaxDegYawRight: Double = 30.0
 
-    private var kpPitch: Double = 100.0
-    private var kiPitch: Double = 0.0
-    private var kdPitch: Double = 0.0
-
-    private var kpRoll: Double = 100.0
-    private var kiRoll: Double = 0.0
-    private var kdRoll: Double = 0.0
-
-    private var kpYaw: Double = 100.0
-    private var kiYaw: Double = 0.0
-    private var kdYaw: Double = 0.0
-
     private var gimbalMaxSpeed: Double = 100.0 // degrees/sec
     private var maxIntegral: Double = 10.0
     private var deadZone: Double = 0.015 // % of screen dimensions
-
-    private var currentPitch: Double = 0.0
-    private var currentYaw: Double = 0.0
-    private var currentRoll: Double = 0.0
-
-    private var isGimbalStateValid = true
-    private var lastRunTimestampMs: Long = 0L
 
     inner class PidController(
         private var kp: Double,
@@ -103,9 +84,64 @@ class GimbalController(val activity: CameraActivity) {
         }
     }
 
-    private val pidControllerPitch = PidController(kpPitch, kiPitch, kdPitch, gimbalMaxSpeed, maxIntegral)
-    private val pidControllerRoll = PidController(kpRoll, kiRoll, kdRoll, gimbalMaxSpeed, maxIntegral)
-    private val pidControllerYaw = PidController(kpYaw, kiYaw, kdYaw, gimbalMaxSpeed, maxIntegral)
+    private val pidControllerPitch = PidController(100.0, 0.0, 0.0, gimbalMaxSpeed, maxIntegral)
+    private val pidControllerRoll = PidController(100.0, 0.0, 0.0, gimbalMaxSpeed, maxIntegral)
+    private val pidControllerYaw = PidController(100.0, 0.0, 0.0, gimbalMaxSpeed, maxIntegral)
+
+    var kpPitch: Double = 100.0
+        set(value) {
+            field = max(0.0, value)
+            pidControllerPitch.setGains(field, kiPitch, kdPitch)
+        }
+    var kiPitch: Double = 0.0
+        set(value) {
+            field = max(0.0, value)
+            pidControllerPitch.setGains(kpPitch, field, kdPitch)
+        }
+    var kdPitch: Double = 0.0
+        set(value) {
+            field = max(0.0, value)
+            pidControllerPitch.setGains(kpPitch, kiPitch, field)
+        }
+
+    var kpRoll: Double = 100.0
+        set(value) {
+            field = max(0.0, value)
+            pidControllerRoll.setGains(field, kiRoll, kdRoll)
+        }
+    var kiRoll: Double = 0.0
+        set(value) {
+            field = max(0.0, value)
+            pidControllerRoll.setGains(kpRoll, field, kdRoll)
+        }
+    var kdRoll: Double = 0.0
+        set(value) {
+            field = max(0.0, value)
+            pidControllerRoll.setGains(kpRoll, kiRoll, field)
+        }
+
+    var kpYaw: Double = 100.0
+        set(value) {
+            field = max(0.0, value)
+            pidControllerYaw.setGains(field, kiYaw, kdYaw)
+        }
+    var kiYaw: Double = 0.0
+        set(value) {
+            field = max(0.0, value)
+            pidControllerYaw.setGains(kpYaw, field, kdYaw)
+        }
+    var kdYaw: Double = 0.0
+        set(value) {
+            field = max(0.0, value)
+            pidControllerYaw.setGains(kpYaw, kiYaw, field)
+        }
+
+    private var currentPitch: Double = 0.0
+    private var currentYaw: Double = 0.0
+    private var currentRoll: Double = 0.0
+
+    private var isGimbalStateValid = true
+    private var lastRunTimestampMs: Long = 0L
 
     fun reset() {
         pidControllerPitch.reset()
