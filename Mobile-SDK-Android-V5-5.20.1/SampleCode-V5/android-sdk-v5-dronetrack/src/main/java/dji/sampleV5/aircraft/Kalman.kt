@@ -1,5 +1,9 @@
 package dji.sampleV5.aircraft
 
+import dji.sdk.keyvalue.value.common.RectF
+import org.jetbrains.kotlinx.multik.api.identity
+import org.jetbrains.kotlinx.multik.api.linalg.dot
+import org.jetbrains.kotlinx.multik.api.linalg.inv
 import org.jetbrains.kotlinx.multik.api.mk
 import org.jetbrains.kotlinx.multik.api.ndarray
 import org.jetbrains.kotlinx.multik.api.zeros
@@ -12,15 +16,30 @@ import org.jetbrains.kotlinx.multik.ndarray.data.NDArray
 import org.jetbrains.kotlinx.multik.ndarray.data.get
 import org.jetbrains.kotlinx.multik.ndarray.data.set
 import org.jetbrains.kotlinx.multik.ndarray.operations.map
+import org.jetbrains.kotlinx.multik.ndarray.operations.minus
+import org.jetbrains.kotlinx.multik.ndarray.operations.plus
+import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.pow
 
 class Kalman {
-    private var matrixX: NDArray<Double, D1>? = null
-    private var matrixF: NDArray<Double, D2>? = null
-    private var matrixH: NDArray<Double, D2>? = null
-    private var matrixP: Double? = null
-    private var matrixR: NDArray<Double, D2>? = null
-    private var matrixQ: NDArray<Double, D2>? = null
+    private var matrixX: NDArray<Double, D1>? = null   // State vector x (8x1)
+    private var matrixF: NDArray<Double, D2>? = null   // State transition matrix F (8x8)
+    private var matrixH: NDArray<Double, D2>? = null   // Measurement matrix H (4x8)
+    private var matrixN: NDArray<Double, D2>? = null   // Process noise input matrix N (8x8)
+    private var matrixR1: NDArray<Double, D2>? = null  // Process noise covariance matrix R1 (8x8)
+    private var matrixR2: NDArray<Double, D2>? = null  // Measurement noise covariance matrix R2 (4x4)
+    private var matrixR12: NDArray<Double, D2>? = null // Cross-covariance matrix R12 (8x4)
+    private var matrixP: NDArray<Double, D2>? = null   // Error covariance matrix P (8x8)
+    private var matrixK: NDArray<Double, D2>? = null   // Kalman gain matrix K (8x4)
+
+    var isInitialized: Boolean = false
+        private set
+
+    var missedFrames: Int = 0
+        private set
+
+    private val maxMissedFrames: Int = 15
 
     // Translated from scipy.linalg.block_diag
     // https://github.com/scipy/scipy/blob/v1.18.0/scipy/linalg/_special_matrices.py#L361-L451
@@ -89,7 +108,6 @@ class Kalman {
     }
 
     // Translated from filterpy.common.discretization.Q_discrete_white_noise
-    // https://filterpy.readthedocs.io/en/latest/_modules/filterpy/common/discretization.html#Q_discrete_white_noise
     // https://github.com/rlabbe/filterpy/blob/master/filterpy/common/discretization.py#L70-L145
     fun qDiscreteWhiteNoise(
         dim: Int,
@@ -150,10 +168,6 @@ class Kalman {
         return finalMatrix.map { it * variance }
     }
 
-    /**
-     * Helper function replicating FilterPy's `order_by_derivative`.
-     * Reorders the block diagonal matrix by interleaving dimensions.
-     */
     fun orderByDerivative(q: NDArray<Double, D2>, dim: Int, blockSize: Int): NDArray<Double, D2> {
         val n = dim * blockSize
         val d = mk.zeros<Double, D2>(intArrayOf(n, n), DataType.DoubleDataType)
@@ -172,10 +186,10 @@ class Kalman {
 
     fun createKalman(
         initPos: NDArray<Double, D1>,
-        stateUncertainty: Double,
-        measurementNoise: Double,
-        processNoise: Double,
-        dt: Double
+        stateUncertainty: Double = 1.0,
+        measurementNoise: Double = 0.1,
+        processNoise: Double = 0.01,
+        dt: Double = 0.1
     ) {
         this.matrixX = mk.ndarray(
             mk[initPos[0], 0.0, initPos[1], 0.0, initPos[2], 0.0, initPos[3], 0.0]
@@ -203,16 +217,174 @@ class Kalman {
             ]
         )
 
-        this.matrixP = stateUncertainty
+        this.matrixN = mk.identity<Double>(8)
 
-        this.matrixR = blockDiag(
+        val q1d = qDiscreteWhiteNoise(2, dt, processNoise, orderByDim = true)
+        this.matrixR1 = blockDiag(q1d, q1d, q1d, q1d)
+
+        this.matrixR2 = blockDiag(
             mk.ndarray(mk[measurementNoise]),
             mk.ndarray(mk[measurementNoise]),
             mk.ndarray(mk[3 * measurementNoise]),
             mk.ndarray(mk[3 * measurementNoise])
         )
 
-        val q1d = qDiscreteWhiteNoise(2, dt, processNoise, orderByDim = true)
-        this.matrixQ = blockDiag(q1d, q1d, q1d, q1d)
+        this.matrixR12 = mk.zeros<Double, D2>(intArrayOf(8, 4), DataType.DoubleDataType)
+
+        this.matrixP = mk.identity<Double>(8).map { it * stateUncertainty }
+
+        this.isInitialized = true
+        this.missedFrames = 0
+    }
+
+    fun initFilter(
+        rect: RectF,
+        stateUncertainty: Double = 1.0,
+        measurementNoise: Double = 0.1,
+        processNoise: Double = 0.01,
+        dt: Double = 0.1
+    ) {
+        val l = rect.left ?: 0.0
+        val t = rect.top ?: 0.0
+        val r = rect.right ?: 0.0
+        val b = rect.bottom ?: 0.0
+        val pos = mk.ndarray(mk[l, t, r, b])
+        createKalman(pos, stateUncertainty, measurementNoise, processNoise, dt)
+    }
+
+// K = (F * P * H^T + N * R12) * (H * P * H^T + R2)^-1
+// x_next = F * x + K * (z - H * x)
+// P_next = F * P * F^T + N * R1 * N^T - (F * P * H^T + N * R12) * (H * P * H^T + R2)^-1 * (F * P * H^T + N * R12)^T
+    fun step(z: NDArray<Double, D1>) {
+        val x = matrixX ?: return
+        val F = matrixF ?: return
+        val H = matrixH ?: return
+        val N = matrixN ?: return
+        val R1 = matrixR1 ?: return
+        val R2 = matrixR2 ?: return
+        val R12 = matrixR12 ?: return
+        val P = matrixP ?: return
+
+        // Innovation / residual: y = z - H * x
+        val Hx = H dot x
+        val y = z - Hx
+
+        // (F * P * H^T + N * R12)
+        val HT = H.transpose()
+        val FP = mk.linalg.dot(F, P)
+        val FPH_T = mk.linalg.dot(FP, HT)
+        val NR12 = mk.linalg.dot(N, R12)
+        val termFPH_NR12 = FPH_T + NR12
+
+        // S = (H * P * H^T + R2)
+        val HP = mk.linalg.dot(H, P)
+        val HPH_T = mk.linalg.dot(HP, HT)
+        val S = HPH_T + R2
+        val SInv = mk.linalg.inv(S)
+
+        // K = (F * P * H^T + N * R12) * (H * P * H^T + R2)^-1
+        val K = mk.linalg.dot(termFPH_NR12, SInv)
+        this.matrixK = K
+
+        // x_next = F * x + K * y
+        val Fx = F dot x
+        val Ky = K dot y
+        val xNext = Fx + Ky
+        this.matrixX = xNext
+
+        // P_next = F * P * F^T + N * R1 * N^T - K * (F * P * H^T + N * R12)^T
+        val FT = F.transpose()
+        val FPF_T = mk.linalg.dot(FP, FT)
+
+        val NT = N.transpose()
+        val NR1 = mk.linalg.dot(N, R1)
+        val NR1N_T = mk.linalg.dot(NR1, NT)
+
+        val termFPF_NR1N = FPF_T + NR1N_T
+        val termFPH_NR12_T = termFPH_NR12.transpose()
+        val K_termT = mk.linalg.dot(K, termFPH_NR12_T)
+
+        val PNext = termFPF_NR1N - K_termT
+        this.matrixP = PNext
+    }
+
+//    x_next = F * x
+//    P_next = F * P * F^T + N * R1 * N^T
+    fun predictOnly() {
+        val x = matrixX ?: return
+        val F = matrixF ?: return
+        val N = matrixN ?: return
+        val R1 = matrixR1 ?: return
+        val P = matrixP ?: return
+
+        this.matrixX = F dot x
+
+        val FP = mk.linalg.dot(F, P)
+        val FT = F.transpose()
+        val FPF_T = mk.linalg.dot(FP, FT)
+
+        val NT = N.transpose()
+        val NR1 = mk.linalg.dot(N, R1)
+        val NR1N_T = mk.linalg.dot(NR1, NT)
+
+        this.matrixP = FPF_T + NR1N_T
+    }
+
+    fun getPredictedRect(): RectF? {
+        val x = matrixX ?: return null
+        val l = x[0]
+        val t = x[2]
+        val r = x[4]
+        val b = x[6]
+
+        val left = min(l, r).coerceIn(0.0, 1.0)
+        val top = min(t, b).coerceIn(0.0, 1.0)
+        val right = max(l, r).coerceIn(0.0, 1.0)
+        val bottom = max(t, b).coerceIn(0.0, 1.0)
+
+        if (right <= left || bottom <= top) return null
+        return RectF(left, top, right, bottom)
+    }
+
+    fun processFrame(detectedRect: RectF?): RectF? {
+        if (detectedRect != null) {
+            if (!isInitialized) {
+                initFilter(detectedRect, dt=0.01)
+            } else {
+                val l = detectedRect.left ?: 0.0
+                val t = detectedRect.top ?: 0.0
+                val r = detectedRect.right ?: 0.0
+                val b = detectedRect.bottom ?: 0.0
+                val z = mk.ndarray(mk[l, t, r, b])
+                step(z)
+            }
+            missedFrames = 0
+            return getPredictedRect()
+        } else {
+            if (isInitialized) {
+                predictOnly()
+                missedFrames++
+                if (missedFrames > maxMissedFrames) {
+                    reset()
+                    return null
+                }
+                return getPredictedRect()
+            }
+            return null
+        }
+    }
+
+    fun reset() {
+        matrixX = null
+        matrixF = null
+        matrixH = null
+        matrixN = null
+        matrixR1 = null
+        matrixR2 = null
+        matrixR12 = null
+        matrixP = null
+        matrixK = null
+        isInitialized = false
+        missedFrames = 0
     }
 }

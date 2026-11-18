@@ -39,9 +39,11 @@ class CameraActivity : AppCompatActivity() {
 
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private var swtichToggleDetection: Switch? = null
-
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private var switchToggleTracking: Switch? = null
+    private var tvDetTime: TextView? = null
+    private var detTime: Long = 0L
+
     private var btnPidPitchKpIncrease: Button? = null;
     private var btnPidPitchKpDecrease: Button? = null;
     private var btnPidPitchKiIncrease: Button? = null;
@@ -83,6 +85,7 @@ class CameraActivity : AppCompatActivity() {
 
     private var detectionOverlayView: DetectionOverlay? = null
     private var detector: Detector = Detector()
+    private var kalman: Kalman = Kalman()
     private var gimbalController: GimbalController? = null
     private var detectionActive: Boolean = false
     var trackingActive: Boolean = false
@@ -134,6 +137,13 @@ class CameraActivity : AppCompatActivity() {
 
         switchToggleTracking = findViewById(R.id.enable_track)
         swtichToggleDetection = findViewById(R.id.enable_det)
+        tvDetTime = findViewById(R.id.det_time_text)
+
+        seekBarConfidence = findViewById(R.id.conf_slider)
+        seekBarIou = findViewById(R.id.iou_slider)
+
+        tvConfidence = findViewById(R.id.conf_slider_text)
+        tvIou = findViewById(R.id.iou_slider_text)
 
         btnPidPitchKpIncrease = findViewById(R.id.pid_pitch_kp_incr)
         btnPidPitchKpDecrease = findViewById(R.id.pid_pitch_kp_decr)
@@ -318,12 +328,6 @@ class CameraActivity : AppCompatActivity() {
             -1.0
         )
 
-        seekBarConfidence = findViewById(R.id.conf_slider)
-        seekBarIou = findViewById(R.id.iou_slider)
-
-        tvConfidence = findViewById(R.id.conf_slider_text)
-        tvIou = findViewById(R.id.iou_slider_text)
-
         setupGimbalButton(btnPitchUp, pitchSpeed = 15.0, yawSpeed = 0.0)
         setupGimbalButton(btnPitchDown, pitchSpeed = -15.0, yawSpeed = 0.0)
         setupGimbalButton(btnYawLeft, pitchSpeed = 0.0, yawSpeed = -15.0)
@@ -373,14 +377,20 @@ class CameraActivity : AppCompatActivity() {
                     }.start()
                 }
                 startFrameCapture()
+                tvDetTime?.text = "Detection running: " + detTime + "ms"
             } else {
                 stopFrameCapture()
+                kalman.reset()
                 detectionOverlayView?.clear()
+                tvDetTime?.text = "Detection not running"
             }
         }
 
         setupToggle(switchToggleTracking) { isChecked ->
             trackingActive = isChecked
+            if (!isChecked) {
+                kalman.reset()
+            }
         }
     }
 
@@ -397,20 +407,24 @@ class CameraActivity : AppCompatActivity() {
             val result = detector.detect(scaledBitmap)
             scaledBitmap.recycle()
 
+            val rawTarget = if (result.success && result.targets.isNotEmpty()) result.targets[0] else null
+            val rawRect = rawTarget?.rect
+            val predictedRect = kalman.processFrame(rawRect)
+
             mainHandler.post {
-                if (result.success) {
-                    detectionOverlayView?.setTargets(result.targets)
-                    Log.d("Detection", "Success: ${result.targets.size} targets")
-                    if (result.targets.isNotEmpty()) {
-                        gimbalController?.updateTarget(
-                            result.targets[0].rect, System.currentTimeMillis()
-                        )
-                    } else {
-                        gimbalController?.updateTarget(null, System.currentTimeMillis())
-                    }
+                detTime = result.inferenceTimeMs
+                tvDetTime?.text = "Detection running: " + detTime + "ms"
+                if (predictedRect != null) {
+                    val label = rawTarget?.label ?: "Target"
+                    val score = rawTarget?.score ?: 1.0f
+                    val filteredTarget = Detector.TargetBox(predictedRect, label, score)
+                    detectionOverlayView?.setTargets(listOf(filteredTarget))
+                    gimbalController?.updateTarget(predictedRect, System.currentTimeMillis())
+                    Log.d("Detection", "Kalman predicted target: $predictedRect")
                 } else {
-                    Log.d("Detection", "Failure: ${result.errorMessage}")
+                    detectionOverlayView?.clear()
                     gimbalController?.updateTarget(null, System.currentTimeMillis())
+                    Log.d("Detection", "No target tracked by Kalman")
                 }
             }
         }
