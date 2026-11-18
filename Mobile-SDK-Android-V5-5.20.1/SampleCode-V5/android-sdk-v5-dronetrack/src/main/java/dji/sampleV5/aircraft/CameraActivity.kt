@@ -26,12 +26,17 @@ import dji.v5.manager.KeyManager
 import dji.v5.manager.datacenter.MediaDataCenter
 import dji.v5.manager.interfaces.ICameraStreamManager
 import dji.v5.manager.interfaces.ICameraStreamManager.AvailableCameraUpdatedListener
+import dji.sampleV5.aircraft.models.BasicAircraftControlVM
 import dji.v5.ux.core.widget.fpv.FPVWidget
+import dji.v5.ux.util.ToastUtils
 import java.nio.ByteBuffer
 import java.util.Locale
 
 
 class CameraActivity : AppCompatActivity() {
+    private val basicAircraftControlVM = BasicAircraftControlVM()
+    private var btnTakeOff: Button? = null
+    private var btnLand: Button? = null
     private var btnPitchUp: Button? = null
     private var btnPitchDown: Button? = null
     private var btnYawLeft: Button? = null
@@ -39,6 +44,7 @@ class CameraActivity : AppCompatActivity() {
 
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private var swtichToggleDetection: Switch? = null
+
     @SuppressLint("UseSwitchCompatOrMaterialCode")
     private var switchToggleTracking: Switch? = null
     private var tvDetTime: TextView? = null
@@ -82,10 +88,9 @@ class CameraActivity : AppCompatActivity() {
     private var seekBarConfidence: SeekBar? = null
     private var seekBarIou: SeekBar? = null
 
-
     private var detectionOverlayView: DetectionOverlay? = null
     private var detector: Detector = Detector()
-    private var kalman: Kalman = Kalman()
+    private var tracker: Tracker = Tracker()
     private var gimbalController: GimbalController? = null
     private var detectionActive: Boolean = false
     var trackingActive: Boolean = false
@@ -111,6 +116,37 @@ class CameraActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.camera_view)
+
+        btnTakeOff = findViewById(R.id.btn_takeoff)
+        btnLand = findViewById(R.id.btn_land)
+
+        // Takeoff Button Click Listener
+        btnTakeOff?.setOnClickListener {
+            basicAircraftControlVM.startTakeOff(object :
+                CommonCallbacks.CompletionCallbackWithParam<EmptyMsg> {
+                override fun onSuccess(msg: EmptyMsg?) {
+                    ToastUtils.showToast("Takeoff Succeeded")
+                }
+
+                override fun onFailure(error: IDJIError) {
+                    ToastUtils.showToast("Takeoff Failed: ${error.description()}")
+                }
+            })
+        }
+
+        // Landing Button Click Listener
+        btnLand?.setOnClickListener {
+            basicAircraftControlVM.startLanding(object :
+                CommonCallbacks.CompletionCallbackWithParam<EmptyMsg> {
+                override fun onSuccess(msg: EmptyMsg?) {
+                    ToastUtils.showToast("Landing Succeeded")
+                }
+
+                override fun onFailure(error: IDJIError) {
+                    ToastUtils.showToast("Landing Failed: ${error.description()}")
+                }
+            })
+        }
 
         gimbalController = GimbalController(this)
 
@@ -380,7 +416,7 @@ class CameraActivity : AppCompatActivity() {
                 tvDetTime?.text = "Detection running: " + detTime + "ms"
             } else {
                 stopFrameCapture()
-                kalman.reset()
+                //kalman.reset()
                 detectionOverlayView?.clear()
                 tvDetTime?.text = "Detection not running"
             }
@@ -389,7 +425,7 @@ class CameraActivity : AppCompatActivity() {
         setupToggle(switchToggleTracking) { isChecked ->
             trackingActive = isChecked
             if (!isChecked) {
-                kalman.reset()
+                //kalman.reset()
             }
         }
     }
@@ -407,7 +443,8 @@ class CameraActivity : AppCompatActivity() {
             val result = detector.detect(scaledBitmap)
             scaledBitmap.recycle()
 
-            val rawTarget = if (result.success && result.targets.isNotEmpty()) result.targets[0] else null
+            val rawTarget =
+                if (result.success && result.targets.isNotEmpty()) result.targets[0] else null
             val rawRect = rawTarget?.rect
             val predictedRect = kalman.processFrame(rawRect)
 

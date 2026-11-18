@@ -22,19 +22,33 @@ import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.pow
 
-class Kalman {
-    private var matrixX: NDArray<Double, D1>? = null   // State vector x (8x1)
-    private var matrixF: NDArray<Double, D2>? = null   // State transition matrix F (8x8)
-    private var matrixH: NDArray<Double, D2>? = null   // Measurement matrix H (4x8)
-    private var matrixN: NDArray<Double, D2>? = null   // Process noise input matrix N (8x8)
-    private var matrixR1: NDArray<Double, D2>? = null  // Process noise covariance matrix R1 (8x8)
-    private var matrixR2: NDArray<Double, D2>? = null  // Measurement noise covariance matrix R2 (4x4)
-    private var matrixR12: NDArray<Double, D2>? = null // Cross-covariance matrix R12 (8x4)
-    private var matrixP: NDArray<Double, D2>? = null   // Error covariance matrix P (8x8)
-    private var matrixK: NDArray<Double, D2>? = null   // Kalman gain matrix K (8x4)
 
-    var isInitialized: Boolean = false
-        private set
+class Kalman {
+    var matrixX: NDArray<Double, D1> = mk.zeros(8)   // State vector x (8x1)
+    private var matrixF: NDArray<Double, D2> = mk.zeros(8,8)   // State transition matrix F (8x8)
+    private var matrixH: NDArray<Double, D2> = mk.zeros(4,8)   // Measurement matrix H (4x8)
+    private var matrixN: NDArray<Double, D2> = mk.zeros(8,8)   // Process noise input matrix N (8x8)
+    private var matrixR1: NDArray<Double, D2> = mk.zeros(8,8)  // Process noise covariance matrix R1 (8x8)
+    private var matrixR2: NDArray<Double, D2> = mk.zeros(8,8)  // Measurement noise covariance matrix R2 (4x4)
+    private var matrixR12: NDArray<Double, D2> = mk.zeros(8,4) // Cross-covariance matrix R12 (8x4)
+    private var matrixP: NDArray<Double, D2> =  mk.zeros(8,8)   // Error covariance matrix P (8x8)
+    private var matrixK: NDArray<Double, D2> = mk.zeros(8,4)// Kalman gain matrix K (8x4)
+
+    constructor(
+        rect: RectF,
+        stateUncertainty: Double = 1.0,
+        measurementNoise: Double = 0.1,
+        processNoise: Double = 0.01,
+        dt: Double = 0.1
+    ) {
+        val l = rect.left ?: 0.0
+        val t = rect.top ?: 0.0
+        val r = rect.right ?: 0.0
+        val b = rect.bottom ?: 0.0
+        val pos = mk.ndarray(mk[l, t, r, b])
+        createKalman(pos, stateUncertainty, measurementNoise, processNoise, dt)
+    }
+
 
     var missedFrames: Int = 0
         private set
@@ -237,25 +251,10 @@ class Kalman {
         this.missedFrames = 0
     }
 
-    fun initFilter(
-        rect: RectF,
-        stateUncertainty: Double = 1.0,
-        measurementNoise: Double = 0.1,
-        processNoise: Double = 0.01,
-        dt: Double = 0.1
-    ) {
-        val l = rect.left ?: 0.0
-        val t = rect.top ?: 0.0
-        val r = rect.right ?: 0.0
-        val b = rect.bottom ?: 0.0
-        val pos = mk.ndarray(mk[l, t, r, b])
-        createKalman(pos, stateUncertainty, measurementNoise, processNoise, dt)
-    }
-
 // K = (F * P * H^T + N * R12) * (H * P * H^T + R2)^-1
 // x_next = F * x + K * (z - H * x)
 // P_next = F * P * F^T + N * R1 * N^T - (F * P * H^T + N * R12) * (H * P * H^T + R2)^-1 * (F * P * H^T + N * R12)^T
-    fun step(z: NDArray<Double, D1>) {
+    fun update(z: NDArray<Double, D1>) {
         val x = matrixX ?: return
         val F = matrixF ?: return
         val H = matrixH ?: return
@@ -310,7 +309,7 @@ class Kalman {
 
 //    x_next = F * x
 //    P_next = F * P * F^T + N * R1 * N^T
-    fun predictOnly() {
+    fun predict() {
         val x = matrixX ?: return
         val F = matrixF ?: return
         val N = matrixN ?: return
@@ -330,50 +329,16 @@ class Kalman {
         this.matrixP = FPF_T + NR1N_T
     }
 
-    fun getPredictedRect(): RectF? {
-        val x = matrixX ?: return null
-        val l = x[0]
-        val t = x[2]
-        val r = x[4]
-        val b = x[6]
+    fun currentEstimateRect(): RectF {
+        val x = matrixX
+        val top =    x[0] ?: 0.0
+        val left =   x[2] ?: 0.0
+        val width =  x[4] ?: 0.0
+        val height = x[6] ?: 0.0
 
-        val left = min(l, r).coerceIn(0.0, 1.0)
-        val top = min(t, b).coerceIn(0.0, 1.0)
-        val right = max(l, r).coerceIn(0.0, 1.0)
-        val bottom = max(t, b).coerceIn(0.0, 1.0)
-
-        if (right <= left || bottom <= top) return null
-        return RectF(left, top, right, bottom)
+        return RectF(left, top, left + width, top + height)
     }
-
-    fun processFrame(detectedRect: RectF?): RectF? {
-        if (detectedRect != null) {
-            if (!isInitialized) {
-                initFilter(detectedRect, dt=0.01)
-            } else {
-                val l = detectedRect.left ?: 0.0
-                val t = detectedRect.top ?: 0.0
-                val r = detectedRect.right ?: 0.0
-                val b = detectedRect.bottom ?: 0.0
-                val z = mk.ndarray(mk[l, t, r, b])
-                step(z)
-            }
-            missedFrames = 0
-            return getPredictedRect()
-        } else {
-            if (isInitialized) {
-                predictOnly()
-                missedFrames++
-                if (missedFrames > maxMissedFrames) {
-                    reset()
-                    return null
-                }
-                return getPredictedRect()
-            }
-            return null
-        }
-    }
-
+    /*
     fun reset() {
         matrixX = null
         matrixF = null
@@ -384,7 +349,6 @@ class Kalman {
         matrixR12 = null
         matrixP = null
         matrixK = null
-        isInitialized = false
         missedFrames = 0
-    }
+    }*/
 }

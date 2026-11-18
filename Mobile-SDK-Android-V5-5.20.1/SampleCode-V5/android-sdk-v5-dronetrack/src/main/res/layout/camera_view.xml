@@ -8,7 +8,9 @@
     <dji.v5.ux.core.widget.fpv.FPVWidget
         android:id="@+id/widget_primary_fpv"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent" >
+
+    </dji.v5.ux.core.widget.fpv.FPVWidget>
 
     <dji.sampleV5.aircraft.DetectionOverlay
         android:id="@+id/detection_overlay"
@@ -19,8 +21,8 @@
         android:id="@+id/gimbal_dpad"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="50dp"
-        android:layout_marginTop="50dp">
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="10dp">
 
         <Button
             android:id="@+id/gim_pitchup"
@@ -62,8 +64,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_marginTop="25dp"
-        android:layout_marginEnd="25dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="10dp"
         android:orientation="horizontal">
 
         <LinearLayout
@@ -76,7 +78,8 @@
                 android:id="@+id/pid_roll_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Roll" />
+                android:text="Roll"
+                android:textColor="#FFFFFF" />
 
             <LinearLayout
                 android:id="@+id/pid_roll_kp_tune"
@@ -89,7 +92,8 @@
                     android:id="@+id/pid_roll_kp_text"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="Kp: #" />
+                    android:text="Kp: #"
+                    android:textColor="#FFFFFF" />
 
                 <Button
                     android:id="@+id/pid_roll_kp_decr"
@@ -116,7 +120,8 @@
                     android:id="@+id/pid_roll_ki_text"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="Ki: #" />
+                    android:text="Ki: #"
+                    android:textColor="#FFFFFF" />
 
                 <Button
                     android:id="@+id/pid_roll_ki_decr"
@@ -143,7 +148,8 @@
                     android:id="@+id/pid_roll_kd_text"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="Kd: #" />
+                    android:text="Kd: #"
+                    android:textColor="#FFFFFF" />
 
                 <Button
                     android:id="@+id/pid_roll_kd_decr"
@@ -170,7 +176,8 @@
                 android:id="@+id/pid_pitch_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Pitch" />
+                android:text="Pitch"
+                android:textColor="#FFFFFF" />
 
             <LinearLayout
                 android:id="@+id/pid_pitch_kp_tune"
@@ -183,7 +190,8 @@
                     android:id="@+id/pid_pitch_kp_text"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="Kp: #" />
+                    android:text="Kp: #"
+                    android:textColor="#FFFFFF" />
 
                 <Button
                     android:id="@+id/pid_pitch_kp_decr"
@@ -210,7 +218,8 @@
                     android:id="@+id/pid_pitch_ki_text"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="Ki: #" />
+                    android:text="Ki: #"
+                    android:textColor="#FFFFFF" />
 
                 <Button
                     android:id="@+id/pid_pitch_ki_decr"
@@ -237,7 +246,8 @@
                     android:id="@+id/pid_pitch_kd_text"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="Kd: #" />
+                    android:text="Kd: #"
+                    android:textColor="#FFFFFF" />
 
                 <Button
                     android:id="@+id/pid_pitch_kd_decr"
@@ -265,7 +275,8 @@
                 android:id="@+id/pid_yaw_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Yaw" />
+                android:text="Yaw"
+                android:textColor="#FFFFFF" />
 
             <LinearLayout
                 android:id="@+id/pid_yaw_kp_tune"
@@ -278,7 +289,8 @@
                     android:id="@+id/pid_yaw_kp_text"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="Kp: #" />
+                    android:text="Kp: #"
+                    android:textColor="#FFFFFF" />
 
                 <Button
                     android:id="@+id/pid_yaw_kp_decr"
@@ -305,7 +317,8 @@
                     android:id="@+id/pid_yaw_ki_text"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="Ki: #" />
+                    android:text="Ki: #"
+                    android:textColor="#FFFFFF" />
 
                 <Button
                     android:id="@+id/pid_yaw_ki_decr"
@@ -332,7 +345,8 @@
                     android:id="@+id/pid_yaw_kd_text"
                     android:layout_width="50dp"
                     android:layout_height="wrap_content"
-                    android:text="Kd: #" />
+                    android:text="Kd: #"
+                    android:textColor="#FFFFFF" />
 
                 <Button
                     android:id="@+id/pid_yaw_kd_decr"
@@ -358,7 +372,7 @@
         android:layout_alignParentBottom="true"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="8dp">
+        android:padding="10dp">
 
         <Switch
             android:id="@+id/enable_det"
@@ -366,7 +380,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Detection"
-            android:textAppearance="@style/SwitchTextAppearance" />
+            android:textAppearance="@style/SwitchTextAppearance"
+            android:textColor="#FFFFFF" />
 
         <Switch
             android:id="@+id/enable_track"
@@ -374,14 +389,16 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Tracking"
-            android:textAppearance="@style/SwitchTextAppearance" />
+            android:textAppearance="@style/SwitchTextAppearance"
+            android:textColor="#FFFFFF" />
 
         <TextView
             android:id="@+id/det_time_text"
             android:layout_width="20dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Detection not running" />
+            android:text="Detection not running"
+            android:textColor="#FFFFFF" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="0dp"
@@ -436,6 +453,29 @@
                 app:layout_constraintTop_toTopOf="@+id/iou_slider_text" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </LinearLayout>
+    
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/bot_detection_bar"
+        android:layout_alignParentStart="true"
+        android:layout_marginStart="10dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_takeoff"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Takeoff" />
+
+        <Button
+            android:id="@+id/btn_land"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:text="Land" />
 
     </LinearLayout>
 
