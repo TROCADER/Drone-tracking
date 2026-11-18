@@ -416,7 +416,7 @@ class CameraActivity : AppCompatActivity() {
                 tvDetTime?.text = "Detection running: " + detTime + "ms"
             } else {
                 stopFrameCapture()
-                //kalman.reset()
+                // tracker.reset()
                 detectionOverlayView?.clear()
                 tvDetTime?.text = "Detection not running"
             }
@@ -425,7 +425,7 @@ class CameraActivity : AppCompatActivity() {
         setupToggle(switchToggleTracking) { isChecked ->
             trackingActive = isChecked
             if (!isChecked) {
-                //kalman.reset()
+                // tracker.reset()
             }
         }
     }
@@ -443,25 +443,30 @@ class CameraActivity : AppCompatActivity() {
             val result = detector.detect(scaledBitmap)
             scaledBitmap.recycle()
 
-            val rawTarget =
-                if (result.success && result.targets.isNotEmpty()) result.targets[0] else null
-            val rawRect = rawTarget?.rect
-            val predictedRect = kalman.processFrame(rawRect)
+            val trackedTarget = if (trackingActive) {
+                tracker.track(result.targets)
+            } else {
+                null
+            }
 
             mainHandler.post {
                 detTime = result.inferenceTimeMs
                 tvDetTime?.text = "Detection running: " + detTime + "ms"
-                if (predictedRect != null) {
-                    val label = rawTarget?.label ?: "Target"
-                    val score = rawTarget?.score ?: 1.0f
-                    val filteredTarget = Detector.TargetBox(predictedRect, label, score)
-                    detectionOverlayView?.setTargets(listOf(filteredTarget))
-                    gimbalController?.updateTarget(predictedRect, System.currentTimeMillis())
-                    Log.d("Detection", "Kalman predicted target: $predictedRect")
+                
+                if (trackingActive) {
+                    if (trackedTarget != null) {
+                        detectionOverlayView?.setTargets(listOf(trackedTarget))
+                        gimbalController?.updateTarget(trackedTarget.rect, System.currentTimeMillis())
+                        Log.d("Detection", "Tracker predicted target: ${trackedTarget.rect}")
+                    } else {
+                        detectionOverlayView?.clear()
+                        gimbalController?.updateTarget(null, System.currentTimeMillis())
+                        Log.d("Detection", "No target tracked")
+                    }
                 } else {
-                    detectionOverlayView?.clear()
+                    // When tracking is disabled, simply show raw detections
+                    detectionOverlayView?.setTargets(result.targets)
                     gimbalController?.updateTarget(null, System.currentTimeMillis())
-                    Log.d("Detection", "No target tracked by Kalman")
                 }
             }
         }

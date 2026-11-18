@@ -49,12 +49,6 @@ class Kalman {
         createKalman(pos, stateUncertainty, measurementNoise, processNoise, dt)
     }
 
-
-    var missedFrames: Int = 0
-        private set
-
-    private val maxMissedFrames: Int = 15
-
     // Translated from scipy.linalg.block_diag
     // https://github.com/scipy/scipy/blob/v1.18.0/scipy/linalg/_special_matrices.py#L361-L451
     fun <T : Number> blockDiag(
@@ -246,23 +240,20 @@ class Kalman {
         this.matrixR12 = mk.zeros<Double, D2>(intArrayOf(8, 4), DataType.DoubleDataType)
 
         this.matrixP = mk.identity<Double>(8).map { it * stateUncertainty }
-
-        this.isInitialized = true
-        this.missedFrames = 0
     }
 
 // K = (F * P * H^T + N * R12) * (H * P * H^T + R2)^-1
 // x_next = F * x + K * (z - H * x)
 // P_next = F * P * F^T + N * R1 * N^T - (F * P * H^T + N * R12) * (H * P * H^T + R2)^-1 * (F * P * H^T + N * R12)^T
     fun update(z: NDArray<Double, D1>) {
-        val x = matrixX ?: return
-        val F = matrixF ?: return
-        val H = matrixH ?: return
-        val N = matrixN ?: return
-        val R1 = matrixR1 ?: return
-        val R2 = matrixR2 ?: return
-        val R12 = matrixR12 ?: return
-        val P = matrixP ?: return
+        val x = matrixX
+        val F = matrixF
+        val H = matrixH
+        val N = matrixN
+        val R1 = matrixR1
+        val R2 = matrixR2
+        val R12 = matrixR12
+        val P = matrixP
 
         // Innovation / residual: y = z - H * x
         val Hx = H dot x
@@ -310,11 +301,11 @@ class Kalman {
 //    x_next = F * x
 //    P_next = F * P * F^T + N * R1 * N^T
     fun predict() {
-        val x = matrixX ?: return
-        val F = matrixF ?: return
-        val N = matrixN ?: return
-        val R1 = matrixR1 ?: return
-        val P = matrixP ?: return
+        val x = matrixX
+        val F = matrixF
+        val N = matrixN
+        val R1 = matrixR1
+        val P = matrixP
 
         this.matrixX = F dot x
 
@@ -331,10 +322,10 @@ class Kalman {
 
     fun currentEstimateRect(): RectF {
         val x = matrixX
-        val top =    x[0] ?: 0.0
-        val left =   x[2] ?: 0.0
-        val width =  x[4] ?: 0.0
-        val height = x[6] ?: 0.0
+        val top =    x[0]
+        val left =   x[2]
+        val width =  x[4]
+        val height = x[6]
 
         return RectF(left, top, left + width, top + height)
     }
