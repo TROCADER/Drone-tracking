@@ -444,7 +444,11 @@ class CameraActivity : AppCompatActivity() {
             scaledBitmap.recycle()
 
             val trackedTarget = if (trackingActive) {
-                tracker.track(result.targets)
+                tracker.track(
+                    result.targets,
+                    gimbalController?.lastCommandedPitchSpeed ?: 0.0,
+                    gimbalController?.lastCommandedYawSpeed ?: 0.0
+                )
             } else {
                 null
             }

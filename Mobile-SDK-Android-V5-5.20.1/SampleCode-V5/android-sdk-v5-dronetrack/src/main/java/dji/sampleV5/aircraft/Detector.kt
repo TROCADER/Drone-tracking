@@ -20,7 +20,7 @@ import androidx.core.graphics.scale
 class Detector {
 
     private val TAG = "Detector"
-    private val MODEL_ASSET_NAME = "ssdlite320_mobilenet_v3_xnnpack.pte"
+    private val MODEL_ASSET_NAME = "ssdlite320_mobilenet_v3_vulkan.pte"
     private val INPUT_SIZE = 320 // SSDLite resolution 320x320
     private var confidenceThreshold = 0.30f
     private var iouThreshold = 0.25f
@@ -64,7 +64,9 @@ class Detector {
 
     @Synchronized
     fun loadModel(context: Context): Boolean {
+        Log.i(TAG, "TEST")
         if (isLoaded && module != null) return true
+        Log.i(TAG, "TEST AFTER")
 
         return try {
             val modelPath = assetFilePath(context, MODEL_ASSET_NAME)

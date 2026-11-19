@@ -139,6 +139,11 @@ class GimbalController(val activity: CameraActivity) {
     private var currentPitch: Double = 0.0
     private var currentYaw: Double = 0.0
     private var currentRoll: Double = 0.0
+    
+    var lastCommandedPitchSpeed: Double = 0.0
+        private set
+    var lastCommandedYawSpeed: Double = 0.0
+        private set
 
     private var isGimbalStateValid = true
     private var lastRunTimestampMs: Long = 0L
@@ -150,6 +155,8 @@ class GimbalController(val activity: CameraActivity) {
     }
 
     private fun sendGimbalSpeed(pitchSpeed: Double, yawSpeed: Double, rollSpeed: Double) {
+        lastCommandedPitchSpeed = pitchSpeed
+        lastCommandedYawSpeed = yawSpeed
         activity.rotateGimbalBySpeed(pitchSpeed, yawSpeed, rollSpeed)
     }
 
@@ -182,8 +189,8 @@ class GimbalController(val activity: CameraActivity) {
         val top = targetBoundingBox.top ?: 0.0
         val bottom = targetBoundingBox.bottom ?: 0.0
 
-        val targetCenterX: Float = ((left + right) / 2.0).toFloat()
-        val targetCenterY: Float = ((top + bottom) / 2.0).toFloat()
+        val targetCenterX: Double = (left + right) / 2.0
+        val targetCenterY: Double = (top + bottom) / 2.0
 
         // Offset errors relative to frame center (center = 50%
         val errorX = targetCenterX - 0.5
@@ -194,6 +201,7 @@ class GimbalController(val activity: CameraActivity) {
         if (abs(errorX) < deadZone) {
             pidControllerYaw.reset()
         } else {
+            // error > 0 (target right of center) -> turn right (positive yawSpeed)
             yawSpeed = pidControllerYaw.compute(errorX, timestampMs)
         }
 
@@ -201,7 +209,7 @@ class GimbalController(val activity: CameraActivity) {
         if (abs(errorY) < deadZone) {
             pidControllerPitch.reset()
         } else {
-//            Error down is negative, control signal is positive
+            // error > 0 (target below center) -> pitch down (negative pitchSpeed)
             pitchSpeed = pidControllerPitch.compute(-errorY, timestampMs)
         }
 

@@ -33,19 +33,20 @@ class Kalman {
     private var matrixR12: NDArray<Double, D2> = mk.zeros(8,4) // Cross-covariance matrix R12 (8x4)
     private var matrixP: NDArray<Double, D2> =  mk.zeros(8,8)   // Error covariance matrix P (8x8)
     private var matrixK: NDArray<Double, D2> = mk.zeros(8,4)// Kalman gain matrix K (8x4)
+    private var matrixB: NDArray<Double, D2> = mk.zeros(8,2) // Control input matrix B (8x2)
 
     constructor(
         rect: RectF,
         stateUncertainty: Double = 1.0,
         measurementNoise: Double = 0.1,
         processNoise: Double = 0.01,
-        dt: Double = 0.1
+        dt: Double = 0.012
     ) {
         val l = rect.left ?: 0.0
         val t = rect.top ?: 0.0
         val r = rect.right ?: 0.0
         val b = rect.bottom ?: 0.0
-        val pos = mk.ndarray(mk[l, t, r, b])
+        val pos = mk.ndarray(mk[t, l, r - l, b - t])
         createKalman(pos, stateUncertainty, measurementNoise, processNoise, dt)
     }
 
@@ -240,6 +241,19 @@ class Kalman {
         this.matrixR12 = mk.zeros<Double, D2>(intArrayOf(8, 4), DataType.DoubleDataType)
 
         this.matrixP = mk.identity<Double>(8).map { it * stateUncertainty }
+
+        this.matrixB = mk.ndarray(
+            mk[
+                mk[dt, 0.0],
+                mk[0.0, 0.0],
+                mk[0.0, dt],
+                mk[0.0, 0.0],
+                mk[0.0, 0.0],
+                mk[0.0, 0.0],
+                mk[0.0, 0.0],
+                mk[0.0, 0.0]
+            ]
+        )
     }
 
 // K = (F * P * H^T + N * R12) * (H * P * H^T + R2)^-1
@@ -298,16 +312,23 @@ class Kalman {
         this.matrixP = PNext
     }
 
-//    x_next = F * x
+//    x_next = F * x + B * u
 //    P_next = F * P * F^T + N * R1 * N^T
-    fun predict() {
+    fun predict(u: NDArray<Double, D1>? = null) {
         val x = matrixX
         val F = matrixF
         val N = matrixN
         val R1 = matrixR1
         val P = matrixP
 
-        this.matrixX = F dot x
+        var xNext = F dot x
+        
+        if (u != null) {
+            val B = matrixB
+            xNext = xNext + (B dot u)
+        }
+
+        this.matrixX = xNext
 
         val FP = mk.linalg.dot(F, P)
         val FT = F.transpose()

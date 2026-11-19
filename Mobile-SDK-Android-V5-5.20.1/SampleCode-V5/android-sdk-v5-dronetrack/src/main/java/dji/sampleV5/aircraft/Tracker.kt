@@ -10,8 +10,22 @@ class Tracker {
     private var kFilter: Kalman? = null
     private var missedFrames = 0
     private val maxMissedFrames = 15
+    
+    // Approximate Camera FOV in degrees (can be tuned for specific drone model)
+    private val horizontalFov = 80.0
+    private val verticalFov = 45.0
+    private var lastTimeMs = 0L
 
-    fun track(targets: List<TargetBox>): TargetBox? {
+    fun track(
+        targets: List<TargetBox>, 
+        gimbalPitchSpeed: Double = 0.0, 
+        gimbalYawSpeed: Double = 0.0
+    ): TargetBox? {
+        val currentTimeMs = System.currentTimeMillis()
+        // If first frame, assume default dt of 0.1s
+        val actualDt = if (lastTimeMs > 0) (currentTimeMs - lastTimeMs) / 1000.0 else 0.1
+        lastTimeMs = currentTimeMs
+
         if (kFilter == null) {
             // Initialize if we have targets, otherwise return null
             if (targets.isNotEmpty()) {
@@ -24,7 +38,20 @@ class Tracker {
         }
         
         val kalmanFilter = kFilter!!
-        kalmanFilter.predict()
+        
+        // Calculate control input u based on gimbal velocities
+        // The Kalman filter uses a hardcoded dt=0.1. To apply the correct physical translation,
+        // we scale the velocity based on the ratio of actual_dt to 0.1.
+        val dtRatio = actualDt / 0.1
+        val u = if (gimbalPitchSpeed != 0.0 || gimbalYawSpeed != 0.0) {
+            val topVelocity = (gimbalPitchSpeed / verticalFov) * dtRatio
+            val leftVelocity = (-gimbalYawSpeed / horizontalFov) * dtRatio
+            mk.ndarray(mk[topVelocity, leftVelocity])
+        } else {
+            null
+        }
+
+        kalmanFilter.predict(u)
         val trackedRect = kalmanFilter.currentEstimateRect()
 
         val selectedBox = targets.maxByOrNull { calculateIoU(it.rect, trackedRect) }
@@ -58,5 +85,6 @@ class Tracker {
     fun reset() {
         kFilter = null
         missedFrames = 0
+        lastTimeMs = 0L
     }
 }
